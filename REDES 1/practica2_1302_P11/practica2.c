@@ -25,7 +25,7 @@
 /*Definicion de constantes *************************************************/
 #define ETH_ALEN      6      /* Tamanio de la direccion ethernet           */
 #define ETH_HLEN      14     /* Tamanio de la cabecera ethernet            */
-#define ETH_TLEN      2      /* Tamanio del campo tipo ethernet            */
+#define ETH_TLEN      2	      /* Tamanio del campo tipo ethernet            */
 #define ETH_FRAME_MAX 1514   /* Tamanio maximo la trama ethernet (sin CRC) */
 #define ETH_FRAME_MIN 60     /* Tamanio minimo la trama ethernet (sin CRC) */
 #define ETH_DATA_MAX  (ETH_FRAME_MAX - ETH_HLEN) /* Tamano maximo y minimo de los datos de una trama ethernet*/
@@ -100,14 +100,12 @@ int main(int argc, char **argv)
 				pcap_close(descr);
 				exit(ERROR);
 			}
-			printf("Descomente el código para leer y abrir de una interfaz\n");
-			exit(ERROR);
 
 		
-			//if ( (descr = ??(optarg, ??, ??, ??, errbuf)) == NULL){
-			//	printf("Error: ??(): Interface: %s, %s %s %d.\n", optarg,errbuf,__FILE__,__LINE__);
-			//	exit(ERROR);
-			//}
+			if ( (descr = pcap_open_live(optarg, 10, 0, 100, errbuf)) == NULL){
+				printf("Error: pcap_open_live(): Interface: %s, %s %s %d.\n", optarg,errbuf,__FILE__,__LINE__);
+				exit(ERROR);
+			}
 			break;
 
 		case 'f' :
@@ -119,10 +117,10 @@ int main(int argc, char **argv)
 			printf("Descomente el código para leer y abrir una traza pcap\n");
 			exit(ERROR);
 
-			//if ((descr = pcap_open_offline(optarg, errbuf)) == NULL) {
-			//	printf("Error: pcap_open_offline(): File: %s, %s %s %d.\n", optarg, errbuf, __FILE__, __LINE__);
-			//	exit(ERROR);
-			//}
+			if ((descr = pcap_open_offline(optarg, errbuf)) == NULL) {
+				printf("Error: pcap_open_offline(): File: %s, %s %s %d.\n", optarg, errbuf, __FILE__, __LINE__);
+				exit(ERROR);
+			}
 
 			break;
 
@@ -213,16 +211,17 @@ int main(int argc, char **argv)
 
 
 void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t *pack)
-{
+{	
 	(void)user;
 	printf("Nuevo paquete capturado el %s\n", ctime((const time_t *) & (hdr->ts.tv_sec)));
 	contador++;
 	int i = 0;
+	uint16_t aux;
 	printf("Direccion ETH destino= ");
 	printf("%02X", pack[0]);
 
 	for (i = 1; i < ETH_ALEN; i++) {
-		printf("%02X", pack[i]);
+		printf("-%02X", pack[i]);
 	}
 
 	printf("\n");
@@ -232,15 +231,19 @@ void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t 
 	printf("%02X", pack[0]);
 
 	for (i = 1; i < ETH_ALEN; i++) {
-		printf("%02X", pack[i]);
-	}
+		printf("-%02X", pack[i]);
+	}s
 
 	printf("\n");
 
-	//pack+=ETH_ALEN;
-	// .....
-	// .....
-	// .....
+	pack+=ETH_ALEN;
+	printf("Protocolo ETHERNET = ");
+	
+
+	aux = ntohs(*(uint16_t*) pack);
+	printf("0x%04X", aux);	
+		if(aux==0x0800) printf("SIGO");
+	
 	
 	printf("\n\n");
 	
