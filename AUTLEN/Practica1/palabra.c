@@ -1,37 +1,70 @@
-
+#include "TADcfo.h"
+#include "alfabeto.h"
+#include "palabra.h"
 
 
 struct _Palabra{
- TADcfo *alfabeto;
- TAcfo *cadena;
+ Alfabeto *alfabeto;
+ TADcfo *cadena;
+ int tamanio;
  int next_rm;
 
 };
 
 Palabra *nuevaPalabra(Alfabeto *alf){
-    Palabra *word= (Palabra*)malloc(sizeof(Palabra*));
-    word->cadena=crearTADcfo(100);
-    word->alfabeto=alf;
-    next_add=0;
-    next_rm=0;
-    return word;
+
+  if(!alf)
+    return NULL;
+  Palabra *word= (Palabra*)malloc(sizeof(Palabra));
+  if(!word)
+    return NULL;
+  word->cadena=crearTADcfo(100);
+  if(!word->cadena)
+    return NULL;
+  word->alfabeto=alf;
+  word->next_rm=0;
+  word->tamanio=0;
+  return word;
 
 }
 
 void liberaPalabra(Palabra* word){
+  if(!word)
+    return;
+
+  libera(word->cadena);
   free(word);
 }
 
 int addLetra(Palabra *word, char *letra){
-  if (buscarTADcfo(word->alfabeto, letra)>1){
+  if(!word || !letra)
+    return ERROR;
+  if (buscarAlfabeto(word->alfabeto, letra)>=0){
     insertarTADcfo(word->cadena, letra);
+    word->tamanio++;
     return OK;
   }
   return ERROR;
 }
 
 char* extraePalabra(Palabra *word){
-  word->next_rm--;
-  return getDato(word->cadena, next_rm+1);
+  if(!word)
+    return NULL;
+  word->next_rm++;
+  word->tamanio--;
+  return getDato(word->cadena, word->next_rm-1);
+
+}
+
+void imprimePalabra(FILE *pf, Palabra *palabra){
+
+  if(!palabra || !pf)
+    return;
+
+  fprintf(pf, "\n\t[ (%d) ", palabra->tamanio);
+  imprimirTAD(pf, palabra->cadena);
+  fprintf(pf, "]\n");
+
+  return;
 
 }

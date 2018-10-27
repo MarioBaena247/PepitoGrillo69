@@ -12,7 +12,7 @@ LDLIBS = -lm
 #else
 CFLAGS = -Wall -g -I .
 #-DENTREGA
-LDLIBS = -lm -lpcap
+LDLIBS = -lm
 #endif
 
 # fuentes a considerar (si no se cambia, todos los '.c' del directorio actual)
@@ -25,11 +25,19 @@ EXEC_SOURCES = $(shell grep -l "^int main" $(SOURCES) | xargs)
 EXECS = $(shell echo $(EXEC_SOURCES) | sed -e 's:\.c[p]*::g')
 DEPS = $(shell echo $(SOURCES) | sed -e 's:\.c[p]*:\.d:g')
 
-all:	pruebaTADcfo
+all:	main
 
-pruebaTADcfo:	pruebaTADcfo.o TADcfo.o
+main:	main.o TADcfo.o alfabeto.o estados.o palabra.o afnd.o
 
 TADcfo.o: TADcfo.c TADcfo.h
+
+alfabeto.o: alfabeto.c alfabeto.h TADcfo.h
+
+estados.o: estados.c estados.h TADcfo.h
+
+palabra.o: palabra.c palabra.h TADcfo.h alfabeto.h
+
+afnd.o: afnd.c afnd.h alfabeto.h estados.h palabra.h
 
 # receta para hacer un .d (dependencias automaticas de tipo .h para tus .o)
 %.d : %.c

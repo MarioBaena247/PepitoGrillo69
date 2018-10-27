@@ -41,7 +41,7 @@ TADcfo *crearTADcfo(int tamanio){
 int insertarTADcfo(TADcfo *tad, char *nombre){
 
     if(!nombre) return ERROR;
-    tad->nombres[tad->next]=(char*)malloc(strlen(nombre)*sizeof(char));
+    tad->nombres[tad->next]=(char*)malloc((strlen(nombre)+1)*sizeof(char));
     if (!tad->nombres[tad->next]) return ERROR;
     strcpy(tad->nombres[tad->next], nombre);
     tad->next++;
@@ -103,7 +103,7 @@ int ordenaTADcfo(TADcfo *tad){
 
 		    if(strcmp(tad->nombres[j], tad->nombres[j+1])>0)
 			{
-			    num = tad->nombres[j+1];
+			  num = tad->nombres[j+1];
 				tad->nombres[j+1] = tad->nombres[j];
 				tad->nombres[j] = num;
 
@@ -121,10 +121,12 @@ char* getDato(TADcfo *tad, int pos){
 
 }
 
-void imprimirTAD(TADcfo *tad){
+void imprimirTAD(FILE*pf, TADcfo *tad){
+    if(!tad)
+      return;
     int i;
     for(i=0; i<tad->next; i++){
-      printf("Nombre: %s\n",  tad->nombres[i]);
+      fprintf(pf, "%s ",  tad->nombres[i]);
     }
 
 
