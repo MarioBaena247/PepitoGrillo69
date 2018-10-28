@@ -62,7 +62,7 @@ void imprimePalabra(FILE *pf, Palabra *palabra){
     return;
 
   fprintf(pf, "\n\t[ (%d) ", palabra->tamanio);
-  imprimirTAD(pf, palabra->cadena);
+  imprimirTAD(pf, palabra->cadena, palabra->next_rm);
   fprintf(pf, "]\n");
 
   return;

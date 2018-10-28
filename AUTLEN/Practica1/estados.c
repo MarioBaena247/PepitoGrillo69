@@ -43,11 +43,19 @@ int addEstado(Estados *est ,char *nombre, int tipo){
  return OK;
 }
 
+int buscarEstados(Estados *est, char *nombre){
+
+  if(!est || !nombre)
+    return ERROR;
+
+  return buscarTADcfo(est->estados, nombre);
+}
+
 void imprimeEstados(FILE*pf, Estados *estado){
   if(!estado || !pf)
     return;
-  fprintf(pf, "\n\tQ={-> ");
-  imprimirTAD(pf, estado->estados);
+  fprintf(pf, "{-> ");
+  imprimirTAD(pf, estado->estados, 0);
   fprintf(pf, "* }\n");
   return;
 }

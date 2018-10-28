@@ -17,6 +17,6 @@ int buscarTADcfo(TADcfo *tad, char *nombre);
 void libera(TADcfo *tad);
 int ordenaTADcfo(TADcfo *tad);
 char* getDato(TADcfo *tad, int pos);
-void imprimirTAD(FILE *pf,TADcfo *tad);
+void imprimirTAD(FILE *pf,TADcfo *tad, int pos);
 
 #endif /*_TADCFO_H*/

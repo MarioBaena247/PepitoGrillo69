@@ -121,11 +121,11 @@ char* getDato(TADcfo *tad, int pos){
 
 }
 
-void imprimirTAD(FILE*pf, TADcfo *tad){
+void imprimirTAD(FILE*pf, TADcfo *tad, int pos){
     if(!tad)
       return;
     int i;
-    for(i=0; i<tad->next; i++){
+    for(i=pos; i<tad->next; i++){
       fprintf(pf, "%s ",  tad->nombres[i]);
     }
 

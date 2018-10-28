@@ -46,8 +46,8 @@ void imprimeAlfabeto(FILE *pf, Alfabeto *alf){
   if(!alf || !pf)
     return;
 
-  fprintf(pf, "\n\tA={ ");
-  imprimirTAD(pf, alf->simbolos);
+  fprintf(pf, "{ ");
+  imprimirTAD(pf, alf->simbolos, 0);
   fprintf(pf, "}\n");
   return;
 }
