@@ -17,6 +17,10 @@ Alfabeto *nuevoAlfabeto(int num_simbolos){
   return alf;
 }
 
+int getTamanioAlfabeto(Alfabeto *alf){
+  return alf->tamanio;
+}
+
 
 void liberaAlfabeto(Alfabeto *alf){
   if(!alf)
@@ -39,6 +43,10 @@ int buscarAlfabeto(Alfabeto *alf, char *nombre){
     return ERROR;
 
   return buscarTADcfo(alf->simbolos, nombre);
+}
+
+char *getAlfabeto(Alfabeto *alf, int pos){
+  return getDato(alf->simbolos, pos);
 }
 
 void imprimeAlfabeto(FILE *pf, Alfabeto *alf){

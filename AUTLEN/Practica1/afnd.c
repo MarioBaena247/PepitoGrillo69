@@ -151,29 +151,20 @@ void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd){
 
   if(!fd || !p_afnd)
     return;
-
   imprimePalabra(fd, p_afnd->entrada);
 
   return;
 }
 /*AFND * AFNDInicializaEstado (AFND * p_afnd){
 
-  if(!p_afnd)
-    return NULL;
-
-  int i=0, j=0;
-
-  for(i=0;i<p_afnd->num_estados;i++){
-    for(j=0;j<p_afnd->num_estados;i++){
-        if(p_afnd->conjuntoEstados[i]->tipos[j]==INICIAL){
-          addEstado(p_afnd->conjuntoEstadosActual, p_afnd->conjuntoEstados[i]->nombre,p_afnd->conjuntoEstados[i]->tipos[j]);
-        }
-    }
-  }
-
+  addEstado(p_afnd->conjuntoEstadosActual, getEstadoInicial(p_afnd->conjuntoEstados), INICIAL);
   return p_afnd;
 }
+
 void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
+
+
+
 
 }
 void AFNDTransita(AFND * p_afnd){

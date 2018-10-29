@@ -15,3 +15,5 @@ void liberaAlfabeto(Alfabeto *alf);
 int addsimbolo(Alfabeto *alf ,char *nombre);
 int buscarAlfabeto(Alfabeto *alf, char *nombre);
 void imprimeAlfabeto(FILE *pf, Alfabeto *alf);
+char *getAlfabeto(Alfabeto *alf, int pos);
+int getTamanioAlfabeto(Alfabeto *alf);

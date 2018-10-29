@@ -7,12 +7,6 @@
 #include "palabra.h"
 
 
-#define INICIAL 0
-#define FINAL 1
-#define NORMAL 2
-#define INICIAL_Y_FINAL 3
-
-
 typedef struct _TADafnd AFND;
 
 AFND * AFNDNuevo(char * nombre, int num_estados, int num_simbolos);
