@@ -11,3 +11,4 @@ void liberaPalabra(Palabra* palabra);
 int addLetra(Palabra *word, char *letra);
 char* extraePalabra(Palabra *word);
 void imprimePalabra(FILE*pf, Palabra *palabra);
+int getTamanioPalabra(Palabra *word);

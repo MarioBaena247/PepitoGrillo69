@@ -49,6 +49,15 @@ int addEstado(Estados *est ,char *nombre, int tipo){
  return OK;
 }
 
+/*Devuelve el tipo de estado de un estado dado por nombre*/
+int getTipoEstado(Estados *est, char *nombre){
+
+if(!est || !nombre) return ERROR;
+
+return est->tipos[buscarEstados(est, nombre)];
+
+}
+
 /*Devuelve la posición de un estado en la tabla de tipos*/
 int getPosTipo(Estados *est, int tipo){
   int i;
@@ -87,7 +96,7 @@ void imprimeEstados(FILE*pf, Estados *estado){
   int i=0;
   if(!estado || !pf)
     return;
-fprintf(pf, "\n{");
+fprintf(pf, "{");
 while(i<estado->next){
   switch (estado->tipos[i]) {
     case INICIAL:

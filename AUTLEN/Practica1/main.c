@@ -54,8 +54,8 @@ int main(int argc, char ** argv)
 
 /* SE ESTABLECE COMO ESTADO ACTUAL DEL AUTÓMATA EL INICIAL */
 
-    /*AFNDInicializaEstado (p_afnd);
-    AFNDImprimeConjuntoEstadosActual(stdout, p_afnd);*/
+    AFNDInicializaEstado (p_afnd);
+    AFNDImprimeConjuntoEstadosActual(stdout, p_afnd);
 
 /* SE MUESTRA LA CADENA ACTUAL */
 
@@ -65,7 +65,7 @@ int main(int argc, char ** argv)
 
 /* SE PROCESA LA CADENA DE ENTRADA ACTUAL MOSTRANDO UNA TRAZA DEL FUNCIONAMIENTO DEL AUTOMATA: EN CADA PASO DE ANÁLISIS SE MUESTRA LA CADENA ACTUAL Y EL CONJUNTO DE ESTADOS EN LOS QUE SE ENCUENTRA EL AUTÓMATA */
 
-    /*AFNDProcesaEntrada(stdout,p_afnd);*/
+    AFNDProcesaEntrada(stdout,p_afnd);
 
 
 /* DEFINICIÓN DE LA CADENA DE ENTRADA [ 0 1 1 0 0 ] */
@@ -77,7 +77,7 @@ int main(int argc, char ** argv)
 
 /* SE ESTABLECE COMO ESTADO ACTUAL DEL AUTÓMATA EL INICIAL */
 
-    /*AFNDInicializaEstado (p_afnd);*/
+    AFNDInicializaEstado (p_afnd);
 
 /* SE MUESTRA LA CADENA ACTUAL */
 
@@ -88,7 +88,7 @@ int main(int argc, char ** argv)
 
 /* SE PROCESA LA CADENA DE ENTRADA ACTUAL MOSTRANDO UNA TRAZA DEL FUNCIONAMIENTO DEL AUTOMATA: EN CADA PASO DE ANÁLISIS SE MUESTRA LA CADENA ACTUAL Y EL CONJUNTO DE ESTADOS EN LOS QUE SE ENCUENTRA EL AUTÓMATA */
 
-  /*  AFNDProcesaEntrada(stdout,p_afnd);*/
+  AFNDProcesaEntrada(stdout,p_afnd);
 
 
 /* SE LIBERAN TODOS LOS RECURSOS ASOCIADOS CON EL AFND */

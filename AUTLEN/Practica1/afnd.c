@@ -44,10 +44,7 @@ AFND * AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
   if(!a->conjuntoEstados)
     return NULL;
 
-  a->conjuntoEstadosActual=nuevoEstados(num_estados);
 
-  if(!a->conjuntoEstadosActual)
-    return NULL;
 
   a->entrada=nuevaPalabra(a->alfabeto);
 
@@ -155,21 +152,64 @@ void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd){
 
   return;
 }
-/*AFND * AFNDInicializaEstado (AFND * p_afnd){
+AFND * AFNDInicializaEstado (AFND * p_afnd){
 
+
+  liberaEstado(p_afnd->conjuntoEstadosActual);
+  p_afnd->conjuntoEstadosActual=nuevoEstados(p_afnd->num_estados);
+
+  if(!p_afnd->conjuntoEstadosActual)
+    return NULL;
   addEstado(p_afnd->conjuntoEstadosActual, getEstadoInicial(p_afnd->conjuntoEstados), INICIAL);
   return p_afnd;
 }
 
+
+
+
+
 void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
 
+  int i, aux_contador;
 
+  if(!fd || !p_afnd) return;
+    aux_contador=getTamanioPalabra(p_afnd->entrada);
 
-
+  for(i=0; i<aux_contador; i++){
+    AFNDImprimeConjuntoEstadosActual(fd, p_afnd);
+    AFNDImprimeCadenaActual(fd, p_afnd);
+    AFNDTransita(p_afnd);
+  }
+  AFNDImprimeConjuntoEstadosActual(fd, p_afnd);
+  AFNDImprimeCadenaActual(fd, p_afnd);
 }
+
+
+
+
 void AFNDTransita(AFND * p_afnd){
 
-}*/
+  int i, j;
+  Estados *aux= NULL;
+  TADcfo *tad=NULL;
+  char *caracter=extraePalabra(p_afnd->entrada);
+  if (!caracter) return;
+  aux = nuevoEstados(p_afnd->num_estados);
+
+  for(i=0; i<p_afnd->num_estados; i++){
+  tad=getEstadoFinal(p_afnd->transicion, getEstado(p_afnd->conjuntoEstadosActual,i), caracter);
+    if(tadGetNext(tad)!=0){
+      for(j=0; j<p_afnd->num_estados; j++){
+        addEstado(aux, getDato(tad, j), getTipoEstado(p_afnd->conjuntoEstados, getDato(tad, j)));
+      }
+    }
+  }
+liberaEstado(p_afnd->conjuntoEstadosActual);
+p_afnd->conjuntoEstadosActual=aux;
+return;
+}
+
+
 
 Palabra *getEntrada(AFND *p_afnd){
 

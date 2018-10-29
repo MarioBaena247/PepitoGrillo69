@@ -74,7 +74,6 @@ if(trans->flag==0){
 for(i=0; i<(getTamanioEstados(trans->estados)*getTamanioAlfabeto(trans->alfabeto)); i++){
     if( strcmp(getDato(trans->nombre_estado_i, i), ini)==0){
       if(strcmp(getDato(trans->simbolo_entrada, i), simbolo)==0){
-        printf("OK");
         return insertarTADcfo(trans->nombre_estado_f[i], fin);
       }
     }
@@ -83,9 +82,8 @@ for(i=0; i<(getTamanioEstados(trans->estados)*getTamanioAlfabeto(trans->alfabeto
 }
 
 TADcfo *getEstadoFinal(Transiciones *trans, char *inicial, char *simbolo){
-  if(!inicial || !simbolo || !trans) return ERROR;
+  if(!inicial || !simbolo || !trans) return NULL;
   int i;
-
 
   for(i=0; i<(getTamanioEstados(trans->estados)*getTamanioAlfabeto(trans->alfabeto)); i++){
       if( strcmp(getDato(trans->nombre_estado_i, i), inicial)==0){
@@ -97,6 +95,7 @@ TADcfo *getEstadoFinal(Transiciones *trans, char *inicial, char *simbolo){
 
 return NULL;
 }
+
 
 void imprimirTransicion(FILE *pf,Transiciones *trans){
 

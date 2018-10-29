@@ -18,5 +18,6 @@ void libera(TADcfo *tad);
 int ordenaTADcfo(TADcfo *tad);
 char* getDato(TADcfo *tad, int pos);
 void imprimirTAD(FILE *pf,TADcfo *tad, int pos);
+int tadGetNext(TADcfo *tad);
 
 #endif /*_TADCFO_H*/

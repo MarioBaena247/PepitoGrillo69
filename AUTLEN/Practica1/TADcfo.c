@@ -35,7 +35,10 @@ TADcfo *crearTADcfo(int tamanio){
     return tad;
 }
 
-
+int tadGetNext(TADcfo *tad){
+  if(!tad) return 0;
+  return tad->next;
+}
 
 
 int insertarTADcfo(TADcfo *tad, char *nombre){
@@ -116,7 +119,7 @@ int ordenaTADcfo(TADcfo *tad){
 }
 char* getDato(TADcfo *tad, int pos){
 
-    if(!tad || pos<0 || pos>=tad->tamanio) return NULL;
+    if(!tad || pos<0 || pos>=tad->tamanio || pos>=tad->next) return NULL;
     return tad->nombres[pos];
 
 }

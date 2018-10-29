@@ -36,6 +36,11 @@ void liberaPalabra(Palabra* word){
   free(word);
 }
 
+int getTamanioPalabra(Palabra *word){
+  if(!word) return -1;
+  return word->tamanio;
+}
+
 int addLetra(Palabra *word, char *letra){
   if(!word || !letra)
     return ERROR;
@@ -61,7 +66,7 @@ void imprimePalabra(FILE *pf, Palabra *palabra){
   if(!palabra || !pf)
     return;
 
-  fprintf(pf, "\n\t[ (%d) ", palabra->tamanio);
+  fprintf(pf, "[ (%d) ", palabra->tamanio);
   imprimirTAD(pf, palabra->cadena, palabra->next_rm);
   fprintf(pf, "]\n");
 

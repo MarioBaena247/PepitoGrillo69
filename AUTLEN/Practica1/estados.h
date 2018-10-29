@@ -19,3 +19,4 @@ char *getEstado(Estados *est, int pos);
 char* getEstadoInicial(Estados *est);
 int getPosTipo(Estados *est, int tipo);
 int getTamanioEstados(Estados *est);
+int getTipoEstado(Estados *est, char *nombre);

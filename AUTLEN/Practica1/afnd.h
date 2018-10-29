@@ -18,7 +18,7 @@ AFND * AFNDInsertaTransicion(AFND * p_afnd, char * nombre_estado_i, char * nombr
 AFND * AFNDInsertaLetra(AFND * p_afnd, char * letra);
 void AFNDImprimeConjuntoEstadosActual(FILE * fd, AFND * p_afnd);
 void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd);
-/*AFND * AFNDInicializaEstado (AFND * p_afnd);
+AFND * AFNDInicializaEstado (AFND * p_afnd);
 void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd);
-void AFNDTransita(AFND * p_afnd);*/
+void AFNDTransita(AFND * p_afnd);
 Palabra *getEntrada(AFND *p_afnd);
