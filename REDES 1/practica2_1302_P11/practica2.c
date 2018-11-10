@@ -218,7 +218,7 @@ void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t 
 	printf("------------------------------------------------\n");
 	printf("Nuevo paquete capturado el %s\n", ctime((const time_t *) & (hdr->ts.tv_sec)));
 	contador++;
-	int i = 0, flag=0, protocolo_ip=0;
+	int i = 0, desplazamiento=0, protocolo_ip=0;
 	uint16_t aux;
 	printf("CABECERA NIVEL 2: \n");
 	printf("Direccion ETH destino= ");
@@ -266,13 +266,13 @@ void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t 
 	aux= htons(*(uint16_t*)pack); /*Obtenemos el campo flag + poscion, luego con una mascara obtendremos solamente el campo posicion*/
 	aux= aux&0x1FFF;
 	printf("Desplazamiento: %d\n", aux);
-	if(aux!=0) flag=1; /*Si el campo desplazamiento es distinto de 0 no seguiremos analizando la cabecera de nivel 4*/ 
+	if(aux!=0) desplazamiento=aux; /*Si el campo desplazamiento es distinto de 0 no seguiremos analizando la cabecera de nivel 4*/ 
 	pack+=2;
 	printf("Tiempo de Vida: %d\n", pack[0]);
 	pack+=1;
 	printf("Protocolo: %d\n", pack[0]);
 	protocolo_ip=pack[0];
-	pack+=2;
+	pack+=3;
 	
 	
 	
@@ -309,9 +309,13 @@ void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t 
 	pack+=IP_ALEN;
 	pack+=IP_ALEN;
 	printf("\n\n");
-	if(flag==1){
-		printf("Como el campo desplazamiento es distinto de 0 no continuaremos con el análisis de la cabecera de nivel 4.\n");
-		return;
+	
+	
+	if(desplazamiento!=0){
+		
+		printf("El desplazamiento es diferente a 0, por lo tanto no seguimos analizando las cabeceras de los siguientes niveles");
+		
+		
 	}
 	if(protocolo_ip==PROTOCOLO_TCP){
 		printf("CABECERA DE NIVEL 4: PROTOCOLO TCP\n");
