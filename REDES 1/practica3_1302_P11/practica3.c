@@ -240,7 +240,7 @@ uint8_t moduloICMP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolo
 	uint8_t *arg=NULL;
 	printf("modulo ICMP(%"PRIu16") %s %d.\n",protocolo_inferior,__FILE__,__LINE__);
 
-	if(longitud>ICMP_DATAGRAM_MAX){
+	if(longitud>ICMP_DATAGRAM_MAX-ICMP_HLEN){
 		printf("Tamaño demasiado grande");
 		return ERROR;
 	}
@@ -277,7 +277,7 @@ uint8_t moduloICMP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolo
 		return ERROR;
 		
 	}
-	memcpy(segmento+pos_aux, &aux8, sizeof(uint8_t));
+	memcpy(segmento+pos_aux, arg, sizeof(uint8_t));
 
 
 
@@ -331,7 +331,7 @@ uint8_t moduloUDP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolos
 	pos+=sizeof(uint16_t);
 
 	/*LONGITUD*/
-	aux16= htons(*(uint16_t*) longitud);
+	aux16= htons(longitud+UDP_HLEN);
 	memcpy(segmento+pos,&aux16,sizeof(uint16_t));
 	pos+=sizeof(uint16_t);
 
@@ -367,6 +367,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	uint32_t aux32=0;
 	uint16_t aux16=0;
 	uint8_t aux8=0;
+	uint8_t *arg;
 	uint32_t pos=0,pos_control=0, pos_flags=0, pos_long=0;
 	uint8_t IP_origen[IP_ALEN]={0};
 	uint8_t protocolo_superior=pila_protocolos[0];
@@ -374,21 +375,26 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	pila_protocolos++;
 	uint8_t mascara[IP_ALEN]={0},IP_rango_origen[IP_ALEN]={0},IP_rango_destino[IP_ALEN]={0}, Gateway[IP_ALEN]={0}, MAC_DST[ETH_ALEN]={0};
 	uint16_t MTU=htons(0);
-	uint8_t check_sum[2]={0};
-	int cabecera_ip=12;
+	int cabecera_ip=20, num_paquetes=0;
 
 	printf("modulo IP(%"PRIu16") %s %d.\n",protocolo_inferior,__FILE__,__LINE__);
 
 	Parametros ipdatos=*((Parametros*)parametros);
 	uint8_t* IP_destino=ipdatos.IP_destino;
-
-	if(longitud>IP_DATAGRAM_MAX){
-		printf("Tamaño demasiado grande");
+	
+	
+	if(obtenerMTUInterface(interface, &MTU)==ERROR){
 		return ERROR;
 	}
-//TODO
-//Llamar a solicitudARP(...) adecuadamente y usar ETH_destino de la estructura parametros
-//[...]
+	if(longitud>MTU && ipdatos.bit_DF==1){
+		printf("No se puede fragmentar el archivo ya que por argumentos de entrada se pide que no lo hagamos.\n");
+		return ERROR;
+	}
+	if(longitud>IP_DATAGRAM_MAX-cabecera_ip){
+		printf("Tamaño demasiado grande para protocolo IP" );
+		return ERROR;
+	}
+	
 	if(obtenerIPInterface(interface, IP_origen)==ERROR){
 		printf("No se pudo obtener IP Interface");
 		return ERROR;
@@ -411,159 +417,130 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 			printf("No se pudo obtener Gateway\n");
 			return ERROR;
 		}
-		if(solicitudARP(interface, Gateway, MAC_DST)==ERROR){
+		
+		if(solicitudARP(interface, Gateway, ipdatos.ETH_destino)==ERROR){
 			printf("No se pudo obtener ARP");
 			return ERROR;
 		}
-
 	}
 	else{
-		if(solicitudARP(interface, IP_destino, MAC_DST)==ERROR){
+		if(solicitudARP(interface, IP_destino, ipdatos.ETH_destino)==ERROR){
 			printf("No se pudo obtener ARP");
 			return ERROR;
 		}
 	}
-	memcpy(((Parametros *)parametros)->ETH_destino, MAC_DST, ETH_ALEN);
-	((Parametros *)parametros)->tipo=0x4;
 
 
 
-	/*El paquete requiere de fragmentación*/
-	if((longitud>MTU-cabecera_ip){
-		
-		for(i=0; i<(longitud/(MTU-cabecera_ip); i++){
 		//Rellenamos los campos de la cabecera ip
 		//Version y IHL.
-		aux8=0x40|0x06
-		memcpy(datagrama+pos, &aux8, sizeof(uint8_t));
-		
+		aux8=0x45;
+		memcpy(datagrama, &aux8, sizeof(uint8_t));
 		pos+=1;
+		
 		//Tipo servicio
 		aux16=0;
-		memcpy(datagrama+pos_flags, &aux16, sizeof(uint16_t));
+		memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
 		pos+=1;
-		//Longitud total
-		//Hay que ver si es el ultimo fragmento o no.
-		if(i == (longitud/(MTU-cabecera_ip)){//ultimo fragmento
-			aux16=longitud - i*(MTU-cabecera_ip)+cabecera_ip
-		}
-		else{
-			aux16=MTU+cabecera_ip;
-		}
+		
+		//Longitud total		
+		aux16=MTU+cabecera_ip;
+		
 		aux16=htons(aux16);
 		memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
 		pos+=2;
 		
-			aux16=htons(ID);
-	memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
-	pos+=sizeof(uint16_t);
+		//Identificacion
+		aux16=htons(ID);
+		memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
+		pos+=2;
+		
+		//flags y posicion
+		aux16=(i*(MTU-cabecera_ip))/8;
+		aux16= htons(0x4000 | aux16);
+		
+		
+		memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
+		pos+=2;
+		
+		//Tiempo de vida
+		aux8=64;
+		memcpy(datagrama+pos, &aux8, sizeof(uint8_t));
+		pos+=1;
+		
+		//Protocolo
+		printf("Usamos el protocolo %"PRIu16"", protocolo_superior);
+		aux8=(uint8_t)protocolo_superior;
+		memcpy(datagrama+pos, &aux8, sizeof(uint8_t));
+		pos+=1;
+		//EL checksum primero se deja a 0 y mas tarde se cambia.
+		aux16=0;
+		memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
+		pos_control=pos;
+		pos+=2;
+
+		//Ip origen e Ip destino.
+		
+		memcpy(datagrama+pos, IP_origen, sizeof(uint32_t));
+		pos+=4;
+		memcpy(datagrama+pos, IP_destino, sizeof(uint32_t));
+		pos+=4;
 
 
+		num_paquetes=((int)longitud/(int)MTU-cabecera_ip)+1;
+		
+		for(i=0; i<num_paquetes; i++){
+		
+		//Longitud
+		aux16=MTU;
+		aux16=htons(MTU);
+		memcpy(datagrama+2, &aux16, sizeof(uint16_t));
 
-		check_sum[0]=0;
-		check_sum[1]=0;
-		memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
-		if(calcularChecksum(datagrama, pos, check_sum)==ERROR){
-			printf("ERROR al calcular CheckSum");
+		//flags y OFFSET
+		aux16=(i*(MTU-cabecera_ip))/8;
+		aux16= htons(0x2000 | aux16);
+		memcpy(datagrama+6, &aux16, sizeof(uint16_t));
+		pos+=2;
+
+		//Checksum
+		if (calcularChecksum(datagrama, cabecera_ip, (uint8_t*)(&aux16))==ERROR){
+			printf("Error en checksum ICMP\n");
 			return ERROR;
-		}
-		memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
-
-		memcpy(datagrama+pos, segmento+resultado, MTU-pos);
-		protocolos_registrados[protocolo_inferior](datagrama, MTU, pila_protocolos, parametros);
-		resultado+=MTU-pos;
-		}
-	
-	
-	}
-	
-	//El paquete no necesita fragmentación.
-	else{
+			}
+		memcpy(datagrama+10, &aux16, sizeof(uint16_t));
 		
 		
-	}
-
-
-	aux8=0x45;
-	memcpy(datagrama, &aux8, sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-
-	aux8=0;
-	memcpy(datagrama+pos, &aux8, sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-
-	if(obtenerMTUInterface(interface, &MTU)){
-		printf("ERROR al obtener MTU");
-		return ERROR;
-	}
-	pos_long=pos;
-	aux16=htons(MTU);
-	memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
-	pos+=sizeof(uint16_t);
-
-	aux16=htons(ID);
-	memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
-	pos+=sizeof(uint16_t);
-
-	pos_flags=pos;
-	aux16=htons(0);
-	memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
-	pos+=sizeof(uint16_t);
-
-	aux8=64;
-	memcpy(datagrama+pos, &aux8, sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-
-	aux8=(uint8_t)protocolo_superior;
-	memcpy(datagrama+pos, &aux8, sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-
-	pos_control=pos;
-	aux16=htons(0);
-	memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
-	pos+=sizeof(uint16_t);
-
-	memcpy(datagrama+pos, &IP_origen[0], sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-	memcpy(datagrama+pos, &IP_origen[1], sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-	memcpy(datagrama+pos, &IP_origen[2], sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-	memcpy(datagrama+pos, &IP_origen[3], sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-
-	memcpy(datagrama+pos, &IP_destino[0], sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-	memcpy(datagrama+pos, &IP_destino[1], sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-	memcpy(datagrama+pos, &IP_destino[2], sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-	memcpy(datagrama+pos, &IP_destino[3], sizeof(uint8_t));
-	pos+=sizeof(uint8_t);
-
-	aux32=0;
-	memcpy(datagrama+pos, &aux32, sizeof(uint32_t));
-	pos+=sizeof(uint32_t);
-
-	aux16=htons(resultado/8);
-	aux16=aux16&0x1FFF;
-	memcpy(datagrama+pos_flags, &aux16, sizeof(uint16_t));
-
-	aux16=htons(longitud-resultado+pos);
-	memcpy(datagrama+pos_long, &aux16, sizeof(uint16_t));
-
-	check_sum[0]=0;
-	check_sum[1]=0;
-	memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
-	if(calcularChecksum(datagrama, pos, check_sum)==ERROR){
-		printf("ERROR al calcular CheckSum");
-		return ERROR;
-	}
-	memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
-
-	memcpy(datagrama+pos, segmento+resultado, longitud-resultado);
-
-//llamada/s a protocolo de nivel inferior [...]
+		//Añadimos el mensaje
+		memcpy(datagrama+pos, segmento, MTU-cabecera_ip); 
+		segmento+=(MTU-cabecera_ip);
+		protocolos_registrados[protocolo_inferior](datagrama, longitud-resultado+pos, pila_protocolos, parametros);
+		}
+	
+	//Ultimo fragmento o sin fragmentación.
+	
+	//Longitud
+	aux16= longitud%(MTU-cabecera_ip)+cabecera_ip;
+	aux16=htons(aux16);
+	memcpy(datagrama+2, &aux16, sizeof(uint16_t));
+	
+	//Flags y offset
+	
+	aux16=(i*(MTU-cabecera_ip))/8;
+	aux16= htons(0x4000 | aux16);
+	memcpy(datagrama+6, &aux16, sizeof(uint16_t));
+	
+	
+		//Checksum
+		
+		if (calcularChecksum(datagrama, cabecera_ip, (uint8_t*)(&aux16))==ERROR){
+			printf("Error en checksum ICMP\n");
+			return ERROR;
+			}
+		memcpy(datagrama+10, &aux16, sizeof(uint16_t));
+		
+		//Añadimos el mensaje
+		memcpy(datagrama+pos, segmento, MTU-cabecera_ip); 
+	
 
 	return protocolos_registrados[protocolo_inferior](datagrama, longitud-resultado+pos, pila_protocolos, parametros);
 }
@@ -581,9 +558,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
  ****************************************************************************************/
 
 uint8_t moduloETH(uint8_t* datagrama, uint32_t longitud, uint16_t* pila_protocolos,void *parametros){
-//TODO
-//[....]
-//[...] Variables del modulo
+
 uint8_t trama[ETH_FRAME_MAX]={0};
 uint8_t ETH_or [ETH_ALEN]={0};
 uint16_t IP_type =0x0800;
@@ -595,7 +570,7 @@ struct pcap_pkthdr pcap;
 
 printf("modulo ETH(fisica) %s %d.\n",__FILE__,__LINE__);
 
-if(longitud>ETH_FRAME_MAX){
+if(longitud>ETH_FRAME_MAX-ETH_HLEN){
 	printf("Tamaño demasiado grande");
 	return ERROR;
 }
@@ -632,8 +607,8 @@ memcpy(trama+12, &IP_type, IP_PROTO);
 memcpy(trama+14, datagrama, longitud*sizeof(uint8_t));
 
 
-//TODO
-//Enviar a capa fisica [...]
+
+printf("EL TAMAÑO DEL PAQUETES ES DE %d\n", (int)longitud+ 14);
 if (pcap_inject(descr, &trama, longitud + ETH_ALEN +ETH_ALEN + 2 ) ==-1){
 	 	printf("\n%s\n", pcap_geterr(descr));
 }
@@ -644,9 +619,8 @@ gettimeofday(&tiempo, NULL);
 pcap.ts=tiempo;
 pcap.caplen = longitud + ETH_ALEN +ETH_ALEN + 2;
 pcap.len= longitud + ETH_ALEN +ETH_ALEN + 2;
-pcap_dump((uint8_t *)descr, &pcap, trama);
-
-mostrarHex(trama, longitud+ ETH_ALEN+ ETH_ALEN +2);
+pcap_dump((uint8_t *)pdumper, &pcap, trama);
+	mostrarHex(trama, longitud+ ETH_ALEN+ ETH_ALEN +2);
 return OK;
 }
 
