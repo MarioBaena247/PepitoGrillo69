@@ -31,6 +31,8 @@
 #define ETH_DATA_MAX  (ETH_FRAME_MAX - ETH_HLEN) /* Tamano maximo y minimo de los datos de una trama ethernet*/
 #define ETH_DATA_MIN  (ETH_FRAME_MIN - ETH_HLEN)
 #define IP_ALEN 4			/* Tamanio de la direccion IP					*/
+#define PROTOCOLO_TCP 6
+#define PROTOCOLO_UDP 17
 #define OK 0
 #define ERROR 1
 #define PACK_READ 1
@@ -213,9 +215,11 @@ int main(int argc, char **argv)
 void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t *pack)
 {	
 	(void)user;
+	if(contador!=0)printf("\n\n------------------------------------------------\n");
+	printf("------------------------------------------------\n");
 	printf("Nuevo paquete capturado el %s\n", ctime((const time_t *) & (hdr->ts.tv_sec)));
 	contador++;
-	int i = 0;
+	int i = 0, flag=0, protocolo_ip=0;
 	uint16_t aux;
 	printf("Direccion ETH destino= ");
 	printf("%02X", pack[0]);
@@ -232,7 +236,7 @@ void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t 
 
 	for (i = 1; i < ETH_ALEN; i++) {
 		printf("-%02X", pack[i]);
-	}s
+	}
 
 	printf("\n");
 
@@ -242,10 +246,34 @@ void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t 
 
 	aux = ntohs(*(uint16_t*) pack);
 	printf("0x%04X", aux);	
-		if(aux==0x0800) printf("SIGO");
-	
+		if(aux!=0x0800){
+			printf("\nNo es el protocolo esperado y por lo tanto no se imprimirá la información correspondiente a los siguientes niveles.\n");
+			return;
+			
+		}
+	pack+=ETH_TLEN;
 	
 	printf("\n\n");
+	printf("Cabecera nivel 3:\n");
+	printf("Versión IP: %d\n", (pack[0]&0xF0)>>4);
+	printf("Tamaño de la cabecera (IHL): %d\n", pack[0]&0x0F);
 	
+	pack+=2;
+	
+	printf("Longitud total: %d\n", htons(*(uint16_t*) pack));
+	
+	pack+=4;
+	aux= htons(*(uint16_t*)pack); /*Obtenemos el campo flag + poscion, luego con una mascara obtendremos solamente el campo posicion*/
+	aux= aux&0x1FFF;
+	printf("Desplazamiento: %d\n", aux);
+	if(aux!=0) flag=1; /*Si el campo desplazamiento es distinto de 0 no seguiremos analizando la cabecera de nivel 4*/ 
+	pack+=2;
+	printf("Tiempo de Vida: %d\n", pack[0]);
+	pack+=1;
+	printf("Protocolo: %d\n", pack[0]);
+	if(pack[0]==PROTOCOLO_TCP) protocolo_ip=PROTOCOLO_TCP;
+	else if(pack[0]==PROTOCOLO_UDP) protocolo_ip=PROTOCOLO_UDP;
+	pack+=2;
+	printf("\n%d, %d", flag, protocolo_ip);
 }
 
