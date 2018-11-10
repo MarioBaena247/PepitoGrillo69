@@ -116,8 +116,7 @@ int main(int argc, char **argv)
 				pcap_close(descr);
 				exit(ERROR);
 			}
-			printf("Descomente el código para leer y abrir una traza pcap\n");
-			exit(ERROR);
+
 
 			if ((descr = pcap_open_offline(optarg, errbuf)) == NULL) {
 				printf("Error: pcap_open_offline(): File: %s, %s %s %d.\n", optarg, errbuf, __FILE__, __LINE__);
@@ -196,10 +195,10 @@ int main(int argc, char **argv)
 	retorno=pcap_loop(descr,NO_LIMIT,analizar_paquete,NULL);
 	switch(retorno)	{
 		case OK:
-			printf("Traza leída\n");
+			printf("\nTraza leída\n");
 			break;
 		case PACK_ERR: 
-			printf("Error leyendo paquetes\n");
+			printf("\nError leyendo paquetes\n");
 			break;
 		case BREAKLOOP: 
 			printf("pcap_breakloop llamado\n");
@@ -221,6 +220,7 @@ void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t 
 	contador++;
 	int i = 0, flag=0, protocolo_ip=0;
 	uint16_t aux;
+	printf("CABECERA NIVEL 2: \n");
 	printf("Direccion ETH destino= ");
 	printf("%02X", pack[0]);
 
@@ -254,7 +254,7 @@ void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t 
 	pack+=ETH_TLEN;
 	
 	printf("\n\n");
-	printf("Cabecera nivel 3:\n");
+	printf("CABECERA NIVEL 3:\n");
 	printf("Versión IP: %d\n", (pack[0]&0xF0)>>4);
 	printf("Tamaño de la cabecera (IHL): %d\n", pack[0]&0x0F);
 	
@@ -271,9 +271,96 @@ void analizar_paquete(u_char *user,const struct pcap_pkthdr *hdr, const uint8_t 
 	printf("Tiempo de Vida: %d\n", pack[0]);
 	pack+=1;
 	printf("Protocolo: %d\n", pack[0]);
-	if(pack[0]==PROTOCOLO_TCP) protocolo_ip=PROTOCOLO_TCP;
-	else if(pack[0]==PROTOCOLO_UDP) protocolo_ip=PROTOCOLO_UDP;
+	protocolo_ip=pack[0];
 	pack+=2;
-	printf("\n%d, %d", flag, protocolo_ip);
+	
+	
+	
+	for (i = 0; i < IP_ALEN; i++) {
+		if(pack[i]!=ipsrc_filter[i] && ipsrc_filter[i]!=0){
+			printf("No coincide con la IP origen solicitada %"PRIu8".%"PRIu8".%"PRIu8".%"PRIu8"\t. No seguimos con el analisis.", ipsrc_filter[0], ipsrc_filter[1], ipsrc_filter[2], ipsrc_filter[3]);
+			return;
+		}
+	}
+	
+	
+	printf("Direccion IP origen = ");
+	printf("%d", pack[0]);
+
+	for (i = 1; i < IP_ALEN; i++) {
+		printf(".%d", pack[i]);
+	}
+	printf("\n");
+	pack+=IP_ALEN;
+	
+	
+		for (i = 0; i < IP_ALEN; i++) {
+		if(pack[i]!=ipdst_filter[i] && ipdst_filter[i]!=0){
+			printf("No coincide con la IP destino solicitada %"PRIu8".%"PRIu8".%"PRIu8".%"PRIu8"\t. No seguimos con el analisis.", ipdst_filter[0], ipdst_filter[1], ipdst_filter[2], ipdst_filter[3]);
+			return;
+		}
+	}
+	printf("Direccion IP destino = ");
+	printf("%d", pack[0]);
+
+	for (i = 1; i < IP_ALEN; i++) {
+		printf(".%d", pack[i]);
+	}
+	pack+=IP_ALEN;
+	pack+=IP_ALEN;
+	printf("\n\n");
+	if(flag==1){
+		printf("Como el campo desplazamiento es distinto de 0 no continuaremos con el análisis de la cabecera de nivel 4.\n");
+		return;
+	}
+	if(protocolo_ip==PROTOCOLO_TCP){
+		printf("CABECERA DE NIVEL 4: PROTOCOLO TCP\n");
+		if(sport_filter !=htons(*(uint16_t*) pack)){
+			
+			printf("No coincide con el puerto origen solicitado %d. No seguimos con el analisis.\n", sport_filter);
+			return;
+		}
+		
+		printf("Puerto de origen: %d\n", htons(*(uint16_t*) pack));
+		pack+=2;
+		
+		if(dport_filter !=htons(*(uint16_t*) pack)){
+			
+			printf("No coincide con el puerto origen solicitado %d. No seguimos con el analisis.\n", dport_filter);
+			return;
+		}
+		printf("Puerto de destino: %d\n", htons(*(uint16_t*) pack));
+		pack+=2;
+		pack+=8;
+		pack+=1;
+		printf("Flag SYN: %d", (pack[0]&0x02)>>1);
+		printf("Flag FIN: %d", pack[0]&0x01);
+		
+	}
+	else if(protocolo_ip==PROTOCOLO_UDP){
+		printf("CABECERA DE NIVEL 4: PROTOCOLO UDP\n");
+		if(sport_filter !=htons(*(uint16_t*) pack) && sport_filter!=0){
+			
+			printf("No coincide con el puerto origen solicitado %d. No seguimos con el analisis.\n", sport_filter);
+			return;
+		}
+		
+		printf("Puerto de origen: %d\n", htons(*(uint16_t*) pack));
+		pack+=2;
+		
+		if(dport_filter !=htons(*(uint16_t*) pack) && dport_filter!=0){
+			
+			printf("No coincide con el puerto origen solicitado %d. No seguimos con el analisis.\n", dport_filter);
+			return;
+		}
+		printf("Puerto de destino: %d\n", htons(*(uint16_t*) pack));
+		pack+=2;
+		printf("Longitud: %d", htons(*(uint16_t*) pack));
+
+	}
+	else{
+		printf("No es el protocolo esperado y por lo tanto no se imprimirá la información correspondiente a los siguientes niveles.\n");
+	}
+	
 }
 
