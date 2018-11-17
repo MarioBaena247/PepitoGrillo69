@@ -1,7 +1,5 @@
-
 #include "transiciones_lambda.h"
 #include "estados.h"
-#include "alfabeto.h"
 
 struct _Transiciones_lambda{
   Estados *estados;
@@ -45,16 +43,18 @@ return 1;
 
 void imprimeTrasicionesL(FILE * fd, Transiciones_lambda *trans){
   int i, j;
-printf("\nRL++*={\n");
-printf("\t\t");
+
+  if(!fd || !trans) return;
+fprintf(fd, "\nRL++*={\n");
+fprintf(fd, "\t\t");
   for(i=-1; i<getTamanioEstados(trans->Estados); i++){
     for(j=-1; j<getTamanioEstados(trans->Estados); j++){
-      if(i<0) printf("[%s]\t", getEstado(trans->estados, j+1));
+      if(i<0) fprintf(fd, "[%s]\t", getEstado(trans->estados, j+1));
       else{
-        if(j<0) printf("[%s]\t", getEstado(trans->estados, i));
-        else{printf("%d\t", trans->matriz_l[i][j]);}
+        if(j<0) fprintf(fd, "[%s]\t", getEstado(trans->estados, i));
+        else{fprintf(fd, "%d\t", trans->matriz_l[i][j]);}
       }
     }
-    printf("\n")
+    fprintf(fd, "\n");
   }
 }

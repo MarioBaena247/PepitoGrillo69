@@ -27,7 +27,6 @@ AFND * AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
   if(!nombre || num_estados<0 || num_simbolos<0)
     return NULL;
 
-  int i, j;
   AFND *a=(AFND*)malloc(sizeof(AFND));
   if(!a)
     return NULL;
@@ -61,7 +60,7 @@ AFND * AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
 
   a->num_estados=num_estados;
   a->num_simbolos=num_simbolos;
-  a->transicionesL=crearTransicionesL(a->num_estados);
+  a->transicionesL=crearTransicionesL(a->num_estados, a->conjuntoEstados);
 
   if(!a->transicionesL)
     return NULL;
@@ -72,7 +71,6 @@ AFND * AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
 }
 void AFNDElimina(AFND * p_afnd){
 
-  int i;
   if(!p_afnd)
     return;
 
@@ -227,14 +225,13 @@ Palabra *getEntrada(AFND *p_afnd){
   return p_afnd->entrada;
 }
 
-
 AFND * AFNDInsertaLTransicion(AFND * p_afnd, char * nombre_estado_i, char * nombre_estado_f ){
 
   if(!p_afnd || !nombre_estado_i || !nombre_estado_f){
     return NULL;
   }
 
-  crearTransicionesL(p_afnd->transicionesL, nombre_estado_i, nombre_estado_f);
+  addTransicionL(p_afnd->transicionesL, nombre_estado_i, nombre_estado_f);
 
   return p_afnd;
 
