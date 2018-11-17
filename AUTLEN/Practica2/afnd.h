@@ -1,12 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "TADcfo.h"
-#include "alfabeto.h"
-#include "estados.h"
-#include "palabra.h"
-#include "transiciones_lambda.h"
-#include "transiciones.h"
 
 
 typedef struct _TADafnd AFND;

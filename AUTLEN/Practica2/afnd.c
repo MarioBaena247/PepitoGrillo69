@@ -65,7 +65,6 @@ AFND * AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
   if(!a->transicionesL)
     return NULL;
 
-
   return a;
 
 }
@@ -100,7 +99,7 @@ void AFNDImprime(FILE * fd, AFND* p_afnd){
   imprimeEstados(fd, p_afnd->conjuntoEstados);
   imprimirTransicion(fd, p_afnd->transicion);
   imprimeTrasicionesL(fd, p_afnd->transicionesL);
-  fprintf(fd, "}");
+  fprintf(fd, "\t}\n");
   return;
 
 }

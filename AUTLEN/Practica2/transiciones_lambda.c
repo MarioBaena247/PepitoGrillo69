@@ -26,6 +26,8 @@ Transiciones_lambda *crearTransicionesL(int num_estados, Estados *estados){
   }
   trans->estados=estados;
   trans->flag=0;
+
+  return trans;
 }
 
 int addTransicionL(Transiciones_lambda *trans, char *nombre_estado_i, char *nombre_estado_f){
@@ -34,27 +36,32 @@ if(!trans || !nombre_estado_i || !nombre_estado_f){
   return -1;
 }
 
-if(buscarEstados(trans->estado, nombre_estado_i)<0 || buscarEstados(trans->estado, nombre_estado_f)<0) return -1;
+if(buscarEstados(trans->estados, nombre_estado_i)<0 || buscarEstados(trans->estados, nombre_estado_f)<0) return -1;
 
-  trans->matriz_l[buscarEstados(trans->estado, nombre_estado_i)][buscarEstados(trans->estado, nombre_estado_f)]=1;
+  trans->matriz_l[buscarEstados(trans->estados, nombre_estado_i)][buscarEstados(trans->estados, nombre_estado_f)]=1;
 return 1;
 }
 
 
 void imprimeTrasicionesL(FILE * fd, Transiciones_lambda *trans){
-  int i, j;
+  int i, j, k;
 
   if(!fd || !trans) return;
-fprintf(fd, "\nRL++*={\n");
-fprintf(fd, "\t\t");
-  for(i=-1; i<getTamanioEstados(trans->Estados); i++){
-    for(j=-1; j<getTamanioEstados(trans->Estados); j++){
-      if(i<0) fprintf(fd, "[%s]\t", getEstado(trans->estados, j+1));
-      else{
-        if(j<0) fprintf(fd, "[%s]\t", getEstado(trans->estados, i));
-        else{fprintf(fd, "%d\t", trans->matriz_l[i][j]);}
-      }
+fprintf(fd, "\n\tRL++*={\n");
+fprintf(fd, "\t");
+  for(i=-1; i<getTamanioEstados(trans->estados); i++){
+    for(j=-1; j<getTamanioEstados(trans->estados); j++){
+      if(i<0){ 
+      	if(j>(getTamanioEstados(trans->estados)-2)) break;
+	else fprintf(fd, "\t[%s]", getEstado(trans->estados, j+1));
+	
+	}else{
+        	if(j<0) fprintf(fd, "\t[%s]", getEstado(trans->estados, i));
+        	else{fprintf(fd, "\t%d", trans->matriz_l[i][j]);}
+      	}
     }
     fprintf(fd, "\n");
   }
+
+  return;
 }
