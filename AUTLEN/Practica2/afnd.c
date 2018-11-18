@@ -78,6 +78,7 @@ void AFNDElimina(AFND * p_afnd){
   liberaEstado(p_afnd->conjuntoEstadosActual);
   liberaPalabra(p_afnd->entrada);
   liberaTransicion(p_afnd->transicion);
+  liberaTransicionesL(p_afnd->transicionesL);
 
 
   free(p_afnd->nombres);
@@ -97,8 +98,8 @@ void AFNDImprime(FILE * fd, AFND* p_afnd){
   fprintf(fd, "\n\tnum_estados=%d\n", p_afnd->num_estados);
   fprintf(fd, "\n\tQ=");
   imprimeEstados(fd, p_afnd->conjuntoEstados);
-  imprimirTransicion(fd, p_afnd->transicion);
   imprimeTrasicionesL(fd, p_afnd->transicionesL);
+  imprimirTransicion(fd, p_afnd->transicion);
   fprintf(fd, "\t}\n");
   return;
 
@@ -231,6 +232,16 @@ AFND * AFNDInsertaLTransicion(AFND * p_afnd, char * nombre_estado_i, char * nomb
   }
 
   addTransicionL(p_afnd->transicionesL, nombre_estado_i, nombre_estado_f);
+
+  return p_afnd;
+
+}
+
+AFND *AFNDCierraLTransicion(AFND *p_afnd){
+
+  if(!p_afnd) return NULL;
+
+  closeTransicionL(p_afnd->transicionesL);
 
   return p_afnd;
 
