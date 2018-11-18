@@ -100,6 +100,7 @@ void AFNDImprime(FILE * fd, AFND* p_afnd){
   imprimeEstados(fd, p_afnd->conjuntoEstados);
   imprimeTrasicionesL(fd, p_afnd->transicionesL);
   imprimirTransicion(fd, p_afnd->transicion);
+  imprimir(fd, p_afnd->transicionesL);
   fprintf(fd, "\t}\n");
   return;
 
