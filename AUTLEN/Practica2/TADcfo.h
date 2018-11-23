@@ -13,6 +13,7 @@ typedef struct _TADcfo TADcfo;
 
 TADcfo *crearTADcfo(int tamanio);
 int insertarTADcfo(TADcfo *tad, char *nombre);
+int insertarTADcfo_sinrepetidos(TADcfo *tad, char *nombre);
 int buscarTADcfo(TADcfo *tad, char *nombre);
 void libera(TADcfo *tad);
 int ordenaTADcfo(TADcfo *tad);

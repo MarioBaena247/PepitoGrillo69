@@ -43,7 +43,7 @@ int tadGetNext(TADcfo *tad){
 
 int insertarTADcfo(TADcfo *tad, char *nombre){
 
-    if(!nombre || buscarTADcfo(tad, nombre)==-1 ) return ERROR;
+    if(!nombre || !tad) return ERROR;
     tad->nombres[tad->next]=(char*)malloc((strlen(nombre)+1)*sizeof(char));
     if (!tad->nombres[tad->next]) return ERROR;
     strcpy(tad->nombres[tad->next], nombre);
@@ -51,6 +51,18 @@ int insertarTADcfo(TADcfo *tad, char *nombre){
 
     return OK;
 
+}
+
+int insertarTADcfo_sinrepetidos(TADcfo *tad, char *nombre){
+
+  if(!nombre || !tad) return ERROR;
+  if(buscarTADcfo(tad, nombre)!=-1 && tad->next>0) return -1;
+  tad->nombres[tad->next]=(char*)malloc((strlen(nombre)+1)*sizeof(char));
+  if (!tad->nombres[tad->next]) return ERROR;
+  strcpy(tad->nombres[tad->next], nombre);
+  tad->next++;
+
+  return OK;
 }
 
 

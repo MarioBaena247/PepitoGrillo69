@@ -81,6 +81,8 @@ for(i=0; i<(getTamanioEstados(trans->estados)*getTamanioAlfabeto(trans->alfabeto
   return ERROR;
 }
 
+
+
 TADcfo *getEstadoFinal(Transiciones *trans, char *inicial, char *simbolo){
   if(!inicial || !simbolo || !trans) return NULL;
   int i;

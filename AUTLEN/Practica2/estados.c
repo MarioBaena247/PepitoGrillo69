@@ -43,7 +43,7 @@ void liberaEstado(Estados *est){
 int addEstado(Estados *est ,char *nombre, int tipo){
 
  if(!est || !nombre || tipo<0 || tipo >3) return ERROR;
- insertarTADcfo(est->estados, nombre);
+ if (insertarTADcfo_sinrepetidos(est->estados, nombre)==-1) return ERROR;
  est->tipos[est->next]=tipo;
  est->next++;
  return OK;

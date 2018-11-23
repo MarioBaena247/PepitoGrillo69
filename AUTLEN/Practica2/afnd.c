@@ -163,13 +163,25 @@ void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd){
 }
 AFND * AFNDInicializaEstado (AFND * p_afnd){
 if(!p_afnd) return NULL;
-
+TADcfo *tad=NULL;
+int j;
   liberaEstado(p_afnd->conjuntoEstadosActual);
   p_afnd->conjuntoEstadosActual=nuevoEstados(p_afnd->num_estados);
 
   if(!p_afnd->conjuntoEstadosActual)
     return NULL;
   addEstado(p_afnd->conjuntoEstadosActual, getEstadoInicial(p_afnd->conjuntoEstados), INICIAL);
+
+
+
+   tad=getTransicionL(p_afnd->transicionesL, getEstado(p_afnd->conjuntoEstadosActual, 0));
+       for(j=0; j<p_afnd->num_estados; j++){
+         addEstado(p_afnd->conjuntoEstadosActual, getDato(tad, j), getTipoEstado(p_afnd->conjuntoEstados, getDato(tad, j)));
+       }
+
+
+
+
   return p_afnd;
 }
 
@@ -198,7 +210,7 @@ void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
 
 void AFNDTransita(AFND * p_afnd){
 
-  int i, j;
+  int i, j, k;
   Estados *aux= NULL;
   TADcfo *tad=NULL;
   char *caracter=extraePalabra(p_afnd->entrada);
@@ -208,15 +220,15 @@ void AFNDTransita(AFND * p_afnd){
   /*Aquí añadimos las transiciones "normales"*/
   for(i=0; i<p_afnd->num_estados; i++){
   tad=getEstadoFinal(p_afnd->transicion, getEstado(p_afnd->conjuntoEstadosActual,i), caracter);
-    if(tadGetNext(tad)!=0){
+    if(tadGetNext(tad)!=0){/*Comprobación para ver si el TAD no está vacío*/
       for(j=0; j<p_afnd->num_estados; j++){
         addEstado(aux, getDato(tad, j), getTipoEstado(p_afnd->conjuntoEstados, getDato(tad, j)));
       }
     }
   }
   /*Aquí añadimos las transiciones lambda*/
-  for(i=0; i<p_afnd->num_estados; i++){
-  tad=getTransicionL(p_afnd->transicionesL, getEstado(p_afnd->conjuntoEstadosActual,i));
+ for(k=0; k<i; k++){
+  tad=getTransicionL(p_afnd->transicionesL, getEstado(aux, k));
     if(tadGetNext(tad)!=0){
       for(j=0; j<p_afnd->num_estados; j++){
         addEstado(aux, getDato(tad, j), getTipoEstado(p_afnd->conjuntoEstados, getDato(tad, j)));
