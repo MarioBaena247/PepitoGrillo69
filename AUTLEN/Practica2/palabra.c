@@ -53,7 +53,7 @@ int addLetra(Palabra *word, char *letra){
 }
 
 char* extraePalabra(Palabra *word){
-  if(!word)
+  if(!word || word->tamanio==0)
     return NULL;
   word->next_rm++;
   word->tamanio--;

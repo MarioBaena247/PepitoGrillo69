@@ -47,7 +47,7 @@ int main(int argc, char ** argv)
     AFNDInsertaLTransicion(p_afnd_l, "q1", "q2");
     AFNDInsertaLTransicion(p_afnd_l, "q4", "q2");
 
-    
+
 
     AFNDCierraLTransicion(p_afnd_l);
 
@@ -136,4 +136,3 @@ int main(int argc, char ** argv)
     return 0;
 
 }
-

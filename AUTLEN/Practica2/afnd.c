@@ -46,7 +46,7 @@ AFND * AFNDNuevo(char * nombre, int num_estados, int num_simbolos){
   if(!a->conjuntoEstados)
     return NULL;
 
-
+  a->conjuntoEstadosActual=NULL;
 
   a->entrada=nuevaPalabra(a->alfabeto);
 
@@ -73,12 +73,12 @@ void AFNDElimina(AFND * p_afnd){
   if(!p_afnd)
     return;
 
+  liberaTransicionesL(p_afnd->transicionesL);
+  liberaTransicion(p_afnd->transicion);
   liberaAlfabeto(p_afnd->alfabeto);
+  liberaPalabra(p_afnd->entrada);
   liberaEstado(p_afnd->conjuntoEstados);
   liberaEstado(p_afnd->conjuntoEstadosActual);
-  liberaPalabra(p_afnd->entrada);
-  liberaTransicion(p_afnd->transicion);
-  liberaTransicionesL(p_afnd->transicionesL);
 
 
   free(p_afnd->nombres);
@@ -100,8 +100,7 @@ void AFNDImprime(FILE * fd, AFND* p_afnd){
   imprimeEstados(fd, p_afnd->conjuntoEstados);
   imprimeTrasicionesL(fd, p_afnd->transicionesL);
   imprimirTransicion(fd, p_afnd->transicion);
-  imprimir(fd, p_afnd->transicionesL);
-  fprintf(fd, "\t}\n");
+  fprintf(fd, "}\n");
   return;
 
 }
@@ -163,7 +162,7 @@ void AFNDImprimeCadenaActual(FILE *fd, AFND * p_afnd){
   return;
 }
 AFND * AFNDInicializaEstado (AFND * p_afnd){
-
+if(!p_afnd) return NULL;
 
   liberaEstado(p_afnd->conjuntoEstadosActual);
   p_afnd->conjuntoEstadosActual=nuevoEstados(p_afnd->num_estados);
@@ -206,6 +205,7 @@ void AFNDTransita(AFND * p_afnd){
   if (!caracter) return;
   aux = nuevoEstados(p_afnd->num_estados);
 
+  /*Aquí añadimos las transiciones "normales"*/
   for(i=0; i<p_afnd->num_estados; i++){
   tad=getEstadoFinal(p_afnd->transicion, getEstado(p_afnd->conjuntoEstadosActual,i), caracter);
     if(tadGetNext(tad)!=0){
@@ -214,6 +214,16 @@ void AFNDTransita(AFND * p_afnd){
       }
     }
   }
+  /*Aquí añadimos las transiciones lambda*/
+  for(i=0; i<p_afnd->num_estados; i++){
+  tad=getTransicionL(p_afnd->transicionesL, getEstado(p_afnd->conjuntoEstadosActual,i));
+    if(tadGetNext(tad)!=0){
+      for(j=0; j<p_afnd->num_estados; j++){
+        addEstado(aux, getDato(tad, j), getTipoEstado(p_afnd->conjuntoEstados, getDato(tad, j)));
+      }
+    }
+  }
+
 liberaEstado(p_afnd->conjuntoEstadosActual);
 p_afnd->conjuntoEstadosActual=aux;
 return;
@@ -243,6 +253,15 @@ AFND *AFNDCierraLTransicion(AFND *p_afnd){
   if(!p_afnd) return NULL;
 
   closeTransicionL(p_afnd->transicionesL);
+
+  return p_afnd;
+
+}
+
+
+AFND * AFNDInicializaCadenaActual (AFND * p_afnd ){
+
+  while(extraePalabra(p_afnd->entrada)!=NULL);
 
   return p_afnd;
 

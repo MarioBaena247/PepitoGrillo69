@@ -5,7 +5,8 @@ struct _Transiciones_lambda{
   Estados *estados;
   int **matriz_l;
   int flag;
-  TADcfo **matriz_l_cerrada;
+  TADcfo *matriz_l_cerrada;
+  TADcfo **matriz_l_cerrada_hor;
 };
 
 Transiciones_lambda *crearTransicionesL(int num_estados, Estados *estados){
@@ -29,7 +30,11 @@ Transiciones_lambda *crearTransicionesL(int num_estados, Estados *estados){
   trans->estados=estados;
   trans->flag=0;
 
-  trans->matriz_l_cerrada=(TADcfo**)malloc((getTamanioEstados(estados)*sizeof(TADcfo*)));
+  trans->matriz_l_cerrada=crearTADcfo(getTamanioEstados(estados));
+  trans->matriz_l_cerrada_hor=(TADcfo**)malloc(getTamanioEstados(estados)*sizeof(TADcfo*));
+  for(i=0; i<num_estados; i++){
+    trans->matriz_l_cerrada_hor[i]=crearTADcfo(num_estados);
+  }
 
   if(!trans->matriz_l_cerrada) return NULL;
 
@@ -48,13 +53,10 @@ void liberaTransicionesL(Transiciones_lambda *trans){
   }
 
   for(i=0; i<(getTamanioEstados(trans->estados)); i++){
-
-    if(trans->matriz_l_cerrada[i]==NULL) break;
-
-    libera(trans->matriz_l_cerrada[i]);
+      libera(trans->matriz_l_cerrada_hor[i]);
   }
-
-  free(trans->matriz_l_cerrada);
+  free(trans->matriz_l_cerrada_hor);
+  libera(trans->matriz_l_cerrada);
   free(trans->matriz_l);
   free(trans);
 
@@ -92,6 +94,7 @@ fprintf(fd, "\t");
     }
     fprintf(fd, "\n");
   }
+  fprintf(fd, "\n\t}\n");
 
   return;
 }
@@ -104,20 +107,11 @@ int closeTransicionL(Transiciones_lambda *trans){
 
 
   for(i=0;i<getTamanioEstados(trans->estados);i++){
+    insertarTADcfo(trans->matriz_l_cerrada, getEstado(trans->estados, i));
     for(j=0;j<getTamanioEstados(trans->estados);j++){
       if(trans->matriz_l[i][j]==1){
-        if(!trans->matriz_l_cerrada[i]){
-          trans->matriz_l_cerrada[i]=crearTADcfo(getTamanioEstados(trans->estados));
-          char c=j+'0';
-          insertarTADcfo(trans->matriz_l_cerrada[i], &c);
-        }
-        else{
-          char c=j+'0';
-          insertarTADcfo(trans->matriz_l_cerrada[i], &c);
-        }
-        
+        insertarTADcfo(trans->matriz_l_cerrada_hor[i], getEstado(trans->estados, j));
       }
-
     }
   }
 
@@ -125,19 +119,15 @@ int closeTransicionL(Transiciones_lambda *trans){
 
 }
 
-void imprimir(FILE *fd, Transiciones_lambda *trans){
 
-  imprimirTAD(fd, trans->matriz_l_cerrada[0], 0);
-  imprimirTAD(fd, trans->matriz_l_cerrada[0], 1);
-  imprimirTAD(fd, trans->matriz_l_cerrada[0], 2);
-  imprimirTAD(fd, trans->matriz_l_cerrada[1], 0);
-  imprimirTAD(fd, trans->matriz_l_cerrada[1], 1);
-  imprimirTAD(fd, trans->matriz_l_cerrada[2], 0);
-  imprimirTAD(fd, trans->matriz_l_cerrada[3], 0);
-  imprimirTAD(fd, trans->matriz_l_cerrada[4], 0);
-  imprimirTAD(fd, trans->matriz_l_cerrada[4], 1);
-  imprimirTAD(fd, trans->matriz_l_cerrada[5], 0);
-  imprimirTAD(fd, trans->matriz_l_cerrada[6], 0);
-  imprimirTAD(fd, trans->matriz_l_cerrada[7], 0);
-      
+TADcfo* getTransicionL(Transiciones_lambda *trans, char *estado){
+
+  if(!trans || !estado) return NULL;
+  int aux=0;
+
+  aux=buscarTADcfo(trans->matriz_l_cerrada, estado);
+  if(aux<0) return NULL;
+
+  return trans->matriz_l_cerrada_hor[aux];
+
 }

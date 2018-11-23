@@ -43,7 +43,7 @@ int tadGetNext(TADcfo *tad){
 
 int insertarTADcfo(TADcfo *tad, char *nombre){
 
-    if(!nombre) return ERROR;
+    if(!nombre || buscarTADcfo(tad, nombre)==-1 ) return ERROR;
     tad->nombres[tad->next]=(char*)malloc((strlen(nombre)+1)*sizeof(char));
     if (!tad->nombres[tad->next]) return ERROR;
     strcpy(tad->nombres[tad->next], nombre);
