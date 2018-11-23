@@ -278,9 +278,17 @@ uint8_t moduloUDP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolos
 //TODO
 //[...] 
 //obtenerPuertoOrigen(...)
-	aux16=htons(puerto_origen);
+	obtenerPuertoOrigen(&aux16);
+	memcpy(segmento, &aux16, sizeof(uint16_t));
+	pos+=sizeof(uint16_t);
+
+	aux16=htons(puerto_destino);
 	memcpy(segmento+pos,&aux16,sizeof(uint16_t));
 	pos+=sizeof(uint16_t);
+	
+	
+	
+	
 	
 //TODO Completar el segmento [...]
 //[...] 
