@@ -20,4 +20,4 @@ void AFNDTransita(AFND * p_afnd);
 Palabra *getEntrada(AFND *p_afnd);
 AFND * AFNDInsertaLTransicion(AFND * p_afnd, char * nombre_estado_i, char * nombre_estado_f );
 AFND *AFNDCierraLTransicion(AFND *p_afnd);
-
+AFND * AFNDInicializaCadenaActual (AFND * p_afnd );

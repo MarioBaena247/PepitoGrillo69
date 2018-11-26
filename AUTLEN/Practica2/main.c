@@ -72,7 +72,7 @@ int main(int argc, char ** argv)
 
 /*********************************************************************************/
 
-    /*p_afnd_l = AFNDInicializaCadenaActual(p_afnd_l);
+    p_afnd_l = AFNDInicializaCadenaActual(p_afnd_l);
     AFNDInsertaLetra(p_afnd_l,"1");
     AFNDInsertaLetra(p_afnd_l,"0");
     AFNDInsertaLetra(p_afnd_l,"0");
@@ -90,7 +90,7 @@ int main(int argc, char ** argv)
 
 /*********************************************************************************/
 
-    /*p_afnd_l = AFNDInicializaCadenaActual(p_afnd_l);
+    p_afnd_l = AFNDInicializaCadenaActual(p_afnd_l);
     AFNDInsertaLetra(p_afnd_l,"1");
     AFNDInsertaLetra(p_afnd_l,"1");
     AFNDInsertaLetra(p_afnd_l,"0");
@@ -106,7 +106,7 @@ int main(int argc, char ** argv)
 
 /*********************************************************************************/
 
-    /*p_afnd_l = AFNDInicializaCadenaActual(p_afnd_l);
+    p_afnd_l = AFNDInicializaCadenaActual(p_afnd_l);
     AFNDInsertaLetra(p_afnd_l,"0");
     AFNDInsertaLetra(p_afnd_l,"1");
     AFNDInsertaLetra(p_afnd_l,"0");
