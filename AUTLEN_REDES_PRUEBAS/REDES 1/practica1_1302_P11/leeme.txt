@@ -1,0 +1,15 @@
+Autores: Alberto Cámara y Mario Baena.
+
+Adjuntamos 2 imagenes "funcionalidad1Argumento" y "funcionalidad2Argumento", la primera muestra lo que ocurre al ejecutar el programa como 1 argumento(captura de paquetes desde la interfaz de red) y el segundo al leer una traza.
+Además añadimos el fichero practica1.pcap donde se encuentra la traza que hemos usado para las imagenes.
+
+Realización de los requisitos:
+
+*Normativa de entrega cumplida en su totalidad: Realizado: Varias lecturas del enunciado.
+*Contar paquetes de una traza: Realizado: Se imprime al final del programa tras imprimir los paquetes y coincide con el mostrado por Wireshark.
+*Contar paquetes de la interfaz de red: Realizado: Sumamos uno en la función callback cada vez que añadimos un paquete.
+*Uso de un único flujo para traza e interfaz: Realizado: Tanto leer una traza como leer la interfaz de red usan el mismo codigo, es decir usan la misma funcion pcap_loop.
+*Almacenar correctamente el trafico capturado en vivo en una traza: Realizado: Como se puede ver en la imagen "funcionalidad1Argumento" guardamos correctamente el trafico en una traza.
+*Modificar fecha correctamente: Realizado: En la misma imagen que en el requisito anterior, se puede ver como esta cambia 30 minutos con respecto a la del sistema.
+*Imprimir los N primeros bytes y validarlo con Wireshark: Realizado: Tanto como en la imagen "funcionalidad1Argumento" y "funcionalidad2Argumento" se puede ver que se imprimen los 16 primeros bytes de los paquetes.
+*Ejercicios captura de tráfico: Realizado: Se han realizado los ejercicios como piden en el enunciado, aportando imagenes y resultados de estos.
