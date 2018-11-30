@@ -232,13 +232,42 @@ printf("Enviar(%"PRIu16") %s %d.\n",protocolo,__FILE__,__LINE__);
 uint8_t moduloICMP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolos, void *parametros){
 	uint8_t segmento[ICMP_DATAGRAM_MAX]={0};
 	uint8_t aux8;
-	uint32_t pos=0;
+	uint16_t aux16;
+	uint32_t pos=0, pos_aux;
 	uint8_t protocolo_inferior=pila_protocolos[1];
 	printf("modulo ICMP(%"PRIu16") %s %d.\n",protocolo_inferior,__FILE__,__LINE__);
 	
 	aux8=PING_TIPO;
 	memcpy(segmento+pos,&aux8,sizeof(uint8_t));
 	pos+=sizeof(uint8_t);
+	
+	
+	aux8=PING_CODE;
+	memcpy(segmento+pos,&aux8,sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+	
+	pos_aux=pos;
+	
+	pos+=sizeof(uint16_t);
+	
+	
+	aux16=htons(getpid());
+	memcpy(segmento+pos,&aux16,sizeof(uint16_t));
+	pos+=sizeof(uint16_t);
+	
+	aux16=htons(1);
+	memcpy(segmento+pos,&aux16,sizeof(uint16_t));
+	pos+=sizeof(uint16_t);
+	
+	
+	memcpy(segmento+pos, &mensaje, longitud); 
+	
+	calcularChecksum(segmento, longitud+pos , aux16);
+	memcpy(segmento+pos_aux, &aux16, sizeof(uint16_t));
+
+	
+		
+	
 //TODO rellenar el resto de campos de ICMP, incluyendo el checksum tras haber rellenado todo el segmento, incluyendo el mensaje
 // El campo de identificador se puede asociar al pid, y el de secuencia puede ponerse a 1.
 //[....]
@@ -278,16 +307,30 @@ uint8_t moduloUDP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolos
 //TODO
 //[...] 
 //obtenerPuertoOrigen(...)
+	/*PUERTO DE ORIGEN*/
 	obtenerPuertoOrigen(&aux16);
+	aux16=htons(aux16);
 	memcpy(segmento, &aux16, sizeof(uint16_t));
 	pos+=sizeof(uint16_t);
 
+	/*PUERTO DESTINO*/
 	aux16=htons(puerto_destino);
 	memcpy(segmento+pos,&aux16,sizeof(uint16_t));
 	pos+=sizeof(uint16_t);
 	
+	/*LONGITUD*/
+	aux16= htons(*(uint16_t*) longitud);
+	memcpy(segmento+pos,&aux16,sizeof(uint16_t));
+	pos+=sizeof(uint16_t);
 	
+	/*CHECKSUM*/
+	aux16=htons(0);
+	memcpy(segmento+pos,&aux16,sizeof(uint16_t));
+	pos+=sizeof(uint16_t);	
 	
+	/*OCTETO DE DATOS*/
+	
+	memcpy(segmento+pos, &mensaje, longitud/8);//sería longitud/8?
 	
 	
 //TODO Completar el segmento [...]
@@ -324,6 +367,9 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 
 	Parametros ipdatos=*((Parametros*)parametros);
 	uint8_t* IP_destino=ipdatos.IP_destino;
+	
+	
+	
 
 //TODO
 //Llamar a solicitudARP(...) adecuadamente y usar ETH_destino de la estructura parametros
