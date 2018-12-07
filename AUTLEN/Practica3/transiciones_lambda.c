@@ -131,3 +131,14 @@ TADcfo* getTransicionL(Transiciones_lambda *trans, char *estado){
   return trans->matriz_l_cerrada_hor[aux];
 
 }
+
+int CierreLTransicionIJ(Transiciones_lambda *trans, int i, int j){
+
+  if(!trans || i<0 || j<0)
+    return 0;
+
+  if(trans->matriz_l[i][j]==1)
+    return 1;
+
+  return 0;
+}

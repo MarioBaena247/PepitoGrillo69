@@ -116,8 +116,27 @@ void imprimirTransicion(FILE *pf,Transiciones *trans){
   return;
 }
 
-int AFNDTransicionIndicesEstadoiSimboloEstadof(Transiciones * trans, int i_e1, int i_s, int i_e2){
+int TransicionIndicesEstadoiSimboloEstadof(Transiciones *trans, int i_e1, int i_s, int i_e2){
 
-  if (strcmp(transicion[])==0)
+  if(!trans || i_e1<0 || i_s<0 || i_e2)
+    return 0;
 
+  char c_e1=i_e1+'0';
+  char c_s=i_s+'0';
+  char c_e2=i_e2+'0';
+  int i, j;
+
+  for(i=0; i<(getTamanioEstados(trans->estados)*getTamanioAlfabeto(trans->alfabeto)); i++){
+    if( strcmp(getDato(trans->nombre_estado_i, i), &c_e1)==0){
+      if(strcmp(getDato(trans->simbolo_entrada, i), &c_s)==0){
+        for(j=0;j<(getTamanioEstados(trans->estados)*getTamanioAlfabeto(trans->alfabeto)); j++){
+          if(strcmp(getDato(trans->nombre_estado_f[i], j), &c_e2)==0)
+            return 1;
+        }
+      }
+    }
+}
+  
+return 0;
+  
 }

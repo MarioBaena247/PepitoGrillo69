@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+
+#include "palabra.h"
 
 
 typedef struct _TADafnd AFND;
@@ -23,3 +26,15 @@ AFND *AFNDCierraLTransicion(AFND *p_afnd);
 AFND * AFNDInicializaCadenaActual (AFND * p_afnd );
 int getNumSimbolos(AFND* p_afnd);
 int getNumEstados(AFND* p_afnd);
+AFND * AFND1ODeSimbolo( char * simbolo);
+AFND * AFND1ODeLambda();
+AFND * AFND1ODeVacio();
+int AFNDTipoEstadoEn(AFND * p_afnd, int pos);
+char * AFNDNombreEstadoEn(AFND * p_afnd, int pos);
+int AFNDTransicionIndicesEstadoiSimboloEstadof(AFND * p_afnd, int i_e1, int i_s, int i_e2);
+int AFNDCierreLTransicionIJ(AFND * p_afnd, int i, int j);
+AFND * AFNDAAFND1O(AFND * p_afnd);
+AFND * AFND1OUne(AFND * p_afnd1O_1, AFND * p_afnd1O_2);
+AFND * AFND1OConcatena(AFND * p_afnd_origen1, AFND * p_afnd_origen2);
+AFND * AFND1OEstrella(AFND * p_afnd_origen);
+void AFNDADot(AFND * p_afnd);

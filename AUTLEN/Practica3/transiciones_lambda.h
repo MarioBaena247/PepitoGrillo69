@@ -12,3 +12,4 @@ int addTransicionL(Transiciones_lambda *trans, char *nombre_estado_i, char *nomb
 void imprimeTrasicionesL(FILE *fd, Transiciones_lambda *trans);
 int closeTransicionL(Transiciones_lambda *trans);
 TADcfo* getTransicionL(Transiciones_lambda *trans, char *estado);
+int CierreLTransicionIJ(Transiciones_lambda *trans, int i, int j);

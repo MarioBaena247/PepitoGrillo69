@@ -284,22 +284,19 @@ AFND *AFNDCierraLTransicion(AFND *p_afnd){
 
 AFND * AFNDInicializaCadenaActual (AFND * p_afnd ){
 
+  if(!p_afnd)
+    return NULL;
+
   while(extraePalabra(p_afnd->entrada)!=NULL);
 
   return p_afnd;
 
 }
 
-
-
-
-
-int AFNDCierreLTransicionIJ(AFND * p_afnd, int i, int j){}
-
-
-
-
 AFND * AFND1ODeSimbolo( char * simbolo){
+
+  if(!simbolo)
+    return NULL;
 
   AFND * aut= AFNDNuevo(simbolo, 2, 1);
   AFNDInsertaSimbolo(aut, simbolo);
@@ -330,6 +327,9 @@ AFND * AFND1ODeVacio(){
 
 int AFNDTipoEstadoEn(AFND * p_afnd, int pos){
 
+  if(!p_afnd || pos<0)
+    return -1;
+
     return getTipoEstado(p_afnd->conjuntoEstados, getEstado(p_afnd->conjuntoEstados, pos));
 
 }
@@ -337,15 +337,38 @@ int AFNDTipoEstadoEn(AFND * p_afnd, int pos){
 
 char * AFNDNombreEstadoEn(AFND * p_afnd, int pos){
 
+  if(!p_afnd || pos<0)
+    return NULL;
+
 return  getEstado(p_afnd->conjuntoEstados, pos);
 
 }
 
 
+int AFNDTransicionIndicesEstadoiSimboloEstadof(AFND * p_afnd, int i_e1, int i_s, int i_e2){
+
+  if(!p_afnd || i_e1<0 || i_s<0 || i_e2<0)
+    return 0;
+
+  return TransicionIndicesEstadoiSimboloEstadof(p_afnd->transicion, i_e1, i_s, i_e2);  
+}
+
+int AFNDCierreLTransicionIJ(AFND * p_afnd, int i, int j){
+
+  if(!p_afnd || i<0 || j<0)
+    return 0;
+
+  return CierreLTransicionIJ(p_afnd->transicionesL, i, j);
+}
+
 AFND * AFNDAAFND1O(AFND * p_afnd){
 
-  int i=0, j=0;
-  AFND *nuevo=AFNDNuevo(getNumEstados(p_afnd)+2);
+  if(!p_afnd)
+    return NULL;
+
+  int i, j;
+
+  AFND *nuevo=AFNDNuevo(p_afnd->nombres, getNumEstados(p_afnd)+2, getNumSimbolos(p_afnd));
 
   /*Copiamos los símbolos*/
   for(i=0; i<getNumSimbolos(p_afnd); i++){
@@ -363,7 +386,7 @@ AFND * AFNDAAFND1O(AFND * p_afnd){
 
   for(i=0; i<getNumEstados(p_afnd)*getNumSimbolos(p_afnd); i++){
     for(j=0; j<getNumEstados(p_afnd); j++){///???????????????i/num_simbolos(suelo)
-      AFNDInsertaTransicion(nuevo , getEstado(p_afnd->conjuntoEstados, i%getNumEstados(p_afnd)), getAlfabeto(p_afnd->alfabeto, i%getNumSimbolos(p_afnd)),  getEstado(p_afnd->conjuntoEstados, j));
+      AFNDInsertaTransicion(nuevo , getEstado(p_afnd->conjuntoEstados, i/floor((double)getNumSimbolos(p_afnd))), getAlfabeto(p_afnd->alfabeto, i/floor((double)getNumSimbolos(p_afnd))),  getEstado(p_afnd->conjuntoEstados, j));
     }
   }
 
@@ -378,12 +401,17 @@ AFND * AFNDAAFND1O(AFND * p_afnd){
     }
   }
   p_afnd->num_estados= p_afnd->num_estados+ 2;
+
+  return nuevo;
 }
 
 
 AFND * AFND1OUne(AFND * p_afnd1O_1, AFND * p_afnd1O_2){
 
+  if(!p_afnd1O_1 || !p_afnd1O_2)
+    return NULL;
 
+  
 
 }
 
@@ -391,7 +419,8 @@ AFND * AFND1OUne(AFND * p_afnd1O_1, AFND * p_afnd1O_2){
 
 AFND * AFND1OConcatena(AFND * p_afnd_origen1, AFND * p_afnd_origen2){
 
-
+  if(!p_afnd_origen1 || !p_afnd_origen2)
+    return NULL;
 
 }
 
@@ -399,5 +428,14 @@ AFND * AFND1OConcatena(AFND * p_afnd_origen1, AFND * p_afnd_origen2){
 
 AFND * AFND1OEstrella(AFND * p_afnd_origen){
 
+  if(!p_afnd_origen)
+    return NULL;
 
+
+}
+
+void AFNDADot(AFND * p_afnd){
+
+  if(!p_afnd)
+    return;
 }
