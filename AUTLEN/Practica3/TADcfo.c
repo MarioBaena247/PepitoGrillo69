@@ -11,6 +11,10 @@ struct _TADcfo {
     int next; /*Siguiente posicion a insertar*/
 };
 
+int getTamanioTad(TADcfo *tad){
+  return tad->tamanio;
+}
+
 TADcfo *crearTADcfo(int tamanio){
 
     if (tamanio<0) return NULL;

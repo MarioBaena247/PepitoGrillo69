@@ -61,7 +61,7 @@ transiciones_lambda.o: transiciones_lambda.c transiciones_lambda.h estados.h
 # receta para hacer un ejecutable (suponiendo resto de dependencias OK)
 % :	%.o
 	@echo -n compilando ejecutable \'$@\'...
-	@$(CC) $(CFLAGS) $^ -lm -o $@ $(LDLIBS)
+	@$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
 	@echo [OK]
 
 # limpieza

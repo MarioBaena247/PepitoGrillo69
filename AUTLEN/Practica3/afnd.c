@@ -196,10 +196,6 @@ int j;
   return p_afnd;
 }
 
-
-
-
-
 void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
 
   int i, aux_contador;
@@ -284,9 +280,6 @@ AFND *AFNDCierraLTransicion(AFND *p_afnd){
 
 AFND * AFNDInicializaCadenaActual (AFND * p_afnd ){
 
-  if(!p_afnd)
-    return NULL;
-
   while(extraePalabra(p_afnd->entrada)!=NULL);
 
   return p_afnd;
@@ -294,9 +287,6 @@ AFND * AFNDInicializaCadenaActual (AFND * p_afnd ){
 }
 
 AFND * AFND1ODeSimbolo( char * simbolo){
-
-  if(!simbolo)
-    return NULL;
 
   AFND * aut= AFNDNuevo(simbolo, 2, 1);
   AFNDInsertaSimbolo(aut, simbolo);
@@ -327,9 +317,6 @@ AFND * AFND1ODeVacio(){
 
 int AFNDTipoEstadoEn(AFND * p_afnd, int pos){
 
-  if(!p_afnd || pos<0)
-    return -1;
-
     return getTipoEstado(p_afnd->conjuntoEstados, getEstado(p_afnd->conjuntoEstados, pos));
 
 }
@@ -337,38 +324,21 @@ int AFNDTipoEstadoEn(AFND * p_afnd, int pos){
 
 char * AFNDNombreEstadoEn(AFND * p_afnd, int pos){
 
-  if(!p_afnd || pos<0)
-    return NULL;
-
 return  getEstado(p_afnd->conjuntoEstados, pos);
 
 }
 
+char *AFNDSimboloEn(AFND *p_afnd, int pos){
 
-int AFNDTransicionIndicesEstadoiSimboloEstadof(AFND * p_afnd, int i_e1, int i_s, int i_e2){
-
-  if(!p_afnd || i_e1<0 || i_s<0 || i_e2<0)
-    return 0;
-
-  return TransicionIndicesEstadoiSimboloEstadof(p_afnd->transicion, i_e1, i_s, i_e2);  
+  return getAlfabeto(p_afnd->alfabeto, pos);
 }
 
-int AFNDCierreLTransicionIJ(AFND * p_afnd, int i, int j){
-
-  if(!p_afnd || i<0 || j<0)
-    return 0;
-
-  return CierreLTransicionIJ(p_afnd->transicionesL, i, j);
-}
 
 AFND * AFNDAAFND1O(AFND * p_afnd){
 
-  if(!p_afnd)
-    return NULL;
-
-  int i, j;
-
-  AFND *nuevo=AFNDNuevo(p_afnd->nombres, getNumEstados(p_afnd)+2, getNumSimbolos(p_afnd));
+  int i=0, j=0, k=0;
+  char**aux=NULL;
+  AFND *nuevo=AFNDNuevo("a", getNumEstados(p_afnd)+2, getNumSimbolos(p_afnd));
 
   /*Copiamos los símbolos*/
   for(i=0; i<getNumSimbolos(p_afnd); i++){
@@ -384,43 +354,281 @@ AFND * AFNDAAFND1O(AFND * p_afnd){
 
   /*Copiamos las transiciones*/
 
-  for(i=0; i<getNumEstados(p_afnd)*getNumSimbolos(p_afnd); i++){
-    for(j=0; j<getNumEstados(p_afnd); j++){///???????????????i/num_simbolos(suelo)
-      AFNDInsertaTransicion(nuevo , getEstado(p_afnd->conjuntoEstados, i/floor((double)getNumSimbolos(p_afnd))), getAlfabeto(p_afnd->alfabeto, i/floor((double)getNumSimbolos(p_afnd))),  getEstado(p_afnd->conjuntoEstados, j));
+  for(i=0; i<getNumEstados(p_afnd); i++){
+    for(j=0; j<getNumSimbolos(p_afnd); j++){
+      aux=getPosTransicion(p_afnd->transicion, AFNDNombreEstadoEn(p_afnd, i), getAlfabeto(p_afnd->alfabeto, j));
+      k=0;
+      while(aux[k]){
+        AFNDInsertaTransicion(nuevo, AFNDNombreEstadoEn(p_afnd, i),  getAlfabeto(p_afnd->alfabeto, j), aux[k]);
+        k++;
+      }
+      free(aux);
     }
   }
 
-  AFNDInsertaLTransicion(p_afnd, "aux_ini", getEstadoInicial(p_afnd->conjuntoEstados));
-  estadoNormal(p_afnd, getPosTipo(p_afnd->conjuntoEstados, INICIAL));
-
+  /*Copiamos las transiciones lambda*/
   for(i=0; i<getNumEstados(p_afnd); i++){
+      aux=getPosTransicionL(p_afnd->transicionesL, AFNDNombreEstadoEn(p_afnd, i));
+      k=0;
+      while(aux[k]){
+
+        AFNDInsertaLTransicion(nuevo, AFNDNombreEstadoEn(p_afnd, i), aux[k]);
+        k++;
+      }
+      free(aux);
+  }
+
+
+  /**/
+
+  AFNDInsertaLTransicion(nuevo, "aux_ini", getEstadoInicial(p_afnd->conjuntoEstados));
+  estadoNormal(nuevo->conjuntoEstados, getPosTipo(p_afnd->conjuntoEstados, INICIAL));
+
+  for(i=0; i<getNumEstados(nuevo)-2; i++){
 
     if(AFNDTipoEstadoEn(p_afnd, i)==FINAL){
       AFNDInsertaLTransicion(p_afnd, AFNDNombreEstadoEn(p_afnd, i), "aux_fin");
-      estadoNormal(p_afnd, i);
+      estadoNormal(nuevo->conjuntoEstados, i);
     }
   }
-  p_afnd->num_estados= p_afnd->num_estados+ 2;
 
+
+  //AFNDElimina(p_afnd);
   return nuevo;
 }
 
 
-AFND * AFND1OUne(AFND * p_afnd1O_1, AFND * p_afnd1O_2){
+AFND * AFND1OConcatena(AFND * p_afnd1O_1, AFND * p_afnd1O_2){
 
-  if(!p_afnd1O_1 || !p_afnd1O_2)
-    return NULL;
 
-  
 
+  int i, j=0, k=0, aux_final=0, aux_incial=0;
+  char nombre_estado_i[100], nombre_estado_f[100];
+  char concatena[]="_1", concatenaa[]="_2";
+
+    TADcfo *aux=crearTADcfo(getNumSimbolos(p_afnd1O_1)+getNumSimbolos(p_afnd1O_2));
+    //Calculamos el número de símbolos que tienen ambos estados
+  for(i=0; i<getNumSimbolos(p_afnd1O_1); i++){
+    insertarTADcfo_sinrepetidos(aux, AFNDSimboloEn(p_afnd1O_1, i));
+
+  }
+
+  for(i=0; i<getNumSimbolos(p_afnd1O_2); i++){
+    insertarTADcfo_sinrepetidos(aux, AFNDSimboloEn(p_afnd1O_2, i));
+
+  }
+
+  AFND *nuevo=AFNDNuevo("Union", getNumEstados(p_afnd1O_1)+getNumEstados(p_afnd1O_2), tadGetNext(aux));
+
+  /*Añadimos los símbolos*/
+  for(i=0; i<tadGetNext(aux); i++){
+  AFNDInsertaSimbolo(nuevo, getDato(aux, i));
+  }
+
+  /*Añadimos los nuevos estados*/
+    for(i=0; i< (getNumEstados(p_afnd1O_1)); i++){
+
+      strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd1O_1, i));
+      strcat(nombre_estado_i, concatena);
+
+      if(AFNDTipoEstadoEn(p_afnd1O_1, i)==FINAL){
+      aux_final=i;
+      AFNDInsertaEstado(nuevo, nombre_estado_i, NORMAL);
+    }else{
+      AFNDInsertaEstado(nuevo, nombre_estado_i, AFNDTipoEstadoEn(p_afnd1O_1, i));
+    }
+    }
+    i=0;
+    for(i=0; i< (getNumEstados(p_afnd1O_2)); i++){
+      strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd1O_1, i));
+      strcat(nombre_estado_i, concatenaa);
+
+      if(AFNDTipoEstadoEn(p_afnd1O_1, i)==INICIAL){
+      aux_final=i;
+      AFNDInsertaEstado(nuevo, nombre_estado_i, NORMAL);
+    }else{
+      AFNDInsertaEstado(nuevo, nombre_estado_i, AFNDTipoEstadoEn(p_afnd1O_1, i));
+    }
+      }
+    /*Añadimos las transiciones*/
+
+    /*Primero las del primer automata*/
+    for(i=0; i<(getNumEstados(p_afnd1O_1)); i++){
+      for(k=0; k<(getNumSimbolos(p_afnd1O_1)); k++){
+        for(j=0; j<getNumEstados(p_afnd1O_1); j++){
+            if(indiceTransicion(p_afnd1O_1->transicion, i, k, j)==1){
+              strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd1O_1, i));
+              strcpy(nombre_estado_f, AFNDNombreEstadoEn(p_afnd1O_1, j));
+              strcat(nombre_estado_i, concatena);
+              strcat(nombre_estado_f, concatena);
+              AFNDInsertaTransicion(nuevo, nombre_estado_i, AFNDSimboloEn(p_afnd1O_1, k), nombre_estado_f);
+            }
+          }
+      }
+  }
+
+  /*Por último las del segundo automata*/
+  for(i=0; i<(getNumEstados(p_afnd1O_2)); i++){
+    for(k=0; k<(getNumSimbolos(p_afnd1O_2)); k++){
+      for(j=0; j<getNumEstados(p_afnd1O_2); j++){
+          if(indiceTransicion(p_afnd1O_2->transicion, i, k, j)==1){
+            strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd1O_2, i));
+            strcpy(nombre_estado_f, AFNDNombreEstadoEn(p_afnd1O_2, j));
+            strcat(nombre_estado_i, concatenaa);
+            strcat(nombre_estado_f, concatenaa);
+            AFNDInsertaTransicion(nuevo, nombre_estado_i, AFNDSimboloEn(p_afnd1O_2, k), nombre_estado_f);
+          }
+        }
+    }
+}
+
+/*Añadimos ahora las transiciones lambda*/
+
+/*Primero las del primer automata*/
+for(i=0; i<(getNumEstados(p_afnd1O_1)); i++){
+  for(k=0; k<(getNumEstados(p_afnd1O_1)); k++){
+      if(indiceLTransicion(p_afnd1O_1->transicionesL, i, k)==1){
+        strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd1O_1, i));
+        strcpy(nombre_estado_f, AFNDNombreEstadoEn(p_afnd1O_1, k));
+        strcat(nombre_estado_i, concatena);
+        strcat(nombre_estado_f, concatena);
+        AFNDInsertaLTransicion(nuevo, nombre_estado_i, nombre_estado_f);
+      }
+  }
+}
+/*Y ahora las del segundo automata*/
+for(i=0; i<(getNumEstados(p_afnd1O_2)); i++){
+  for(k=0; k<(getNumEstados(p_afnd1O_2)); k++){
+      if(indiceLTransicion(p_afnd1O_2->transicionesL, i, k)==1){
+        strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd1O_2, i));
+        strcpy(nombre_estado_f, AFNDNombreEstadoEn(p_afnd1O_2, k));
+        strcat(nombre_estado_i, concatenaa);
+        strcat(nombre_estado_f, concatenaa);
+        AFNDInsertaLTransicion(nuevo, nombre_estado_i, nombre_estado_f);
+      }
+  }
+}
+/*Por último hacemos las transiciones lambda propias de la operacion de concatenacion (1.1),
+es decir, los indices que guardamos antes como aux_incial y aux_final*/
+strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd1O_2, aux_incial));
+strcpy(nombre_estado_f, AFNDNombreEstadoEn(p_afnd1O_2, aux_final));
+strcat(nombre_estado_i, concatena);
+strcat(nombre_estado_f, concatenaa);
+AFNDInsertaLTransicion(nuevo, nombre_estado_i, nombre_estado_f);
+
+return nuevo;
 }
 
 
+AFND * AFND1OUne(AFND * p_afnd_origen1, AFND * p_afnd_origen2){
 
-AFND * AFND1OConcatena(AFND * p_afnd_origen1, AFND * p_afnd_origen2){
+  int i, j=0, k=0;
+  char nombre_estado_i[100], nombre_estado_f[100];
+  char concatena[]="_1", concatenaa[]="_2";
 
-  if(!p_afnd_origen1 || !p_afnd_origen2)
-    return NULL;
+    TADcfo *aux=crearTADcfo(getNumSimbolos(p_afnd_origen1)+getNumSimbolos(p_afnd_origen2));
+    //Calculamos el número de símbolos que tienen ambos estados
+  for(i=0; i<getNumSimbolos(p_afnd_origen1); i++){
+    insertarTADcfo_sinrepetidos(aux, AFNDSimboloEn(p_afnd_origen1, i));
+
+  }
+
+  for(i=0; i<getNumSimbolos(p_afnd_origen2); i++){
+    insertarTADcfo_sinrepetidos(aux, AFNDSimboloEn(p_afnd_origen2, i));
+
+  }
+
+  AFND *nuevo=AFNDNuevo("Union", getNumEstados(p_afnd_origen1)+getNumEstados(p_afnd_origen2), tadGetNext(aux));
+
+  /*Añadimos los símbolos*/
+  for(i=0; i<tadGetNext(aux); i++){
+  AFNDInsertaSimbolo(nuevo, getDato(aux, i));
+  }
+
+  /*Añadimos los nuevos estados*/
+    for(i=0; i< (getNumEstados(p_afnd_origen1)); i++){
+
+      strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd_origen1, i));
+      strcat(nombre_estado_i, concatena);
+
+      if(AFNDTipoEstadoEn(p_afnd_origen1, i)==FINAL){
+      AFNDInsertaEstado(nuevo, nombre_estado_i, NORMAL);
+    }else{
+      AFNDInsertaEstado(nuevo, nombre_estado_i, AFNDTipoEstadoEn(p_afnd_origen1, i));
+    }
+    }
+    i=0;
+    for(i=0; i< (getNumEstados(p_afnd_origen2)); i++){
+      strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd_origen1, i));
+      strcat(nombre_estado_i, concatenaa);
+
+      if(AFNDTipoEstadoEn(p_afnd_origen1, i)==INICIAL){
+      AFNDInsertaEstado(nuevo, nombre_estado_i, NORMAL);
+    }else{
+      AFNDInsertaEstado(nuevo, nombre_estado_i, AFNDTipoEstadoEn(p_afnd_origen1, i));
+    }
+      }
+    /*Añadimos las transiciones*/
+
+    /*Primero las del primer automata*/
+    for(i=0; i<(getNumEstados(p_afnd_origen1)); i++){
+      for(k=0; k<(getNumSimbolos(p_afnd_origen1)); k++){
+        for(j=0; j<getNumEstados(p_afnd_origen1); j++){
+            if(indiceTransicion(p_afnd_origen1->transicion, i, k, j)==1){
+              strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd_origen1, i));
+              strcpy(nombre_estado_f, AFNDNombreEstadoEn(p_afnd_origen1, j));
+              strcat(nombre_estado_i, concatena);
+              strcat(nombre_estado_f, concatena);
+              AFNDInsertaTransicion(nuevo, nombre_estado_i, AFNDSimboloEn(p_afnd_origen1, k), nombre_estado_f);
+            }
+          }
+      }
+  }
+
+  /*Por último las del segundo automata*/
+  for(i=0; i<(getNumEstados(p_afnd_origen2)); i++){
+    for(k=0; k<(getNumSimbolos(p_afnd_origen2)); k++){
+      for(j=0; j<getNumEstados(p_afnd_origen2); j++){
+          if(indiceTransicion(p_afnd_origen2->transicion, i, k, j)==1){
+            strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd_origen2, i));
+            strcpy(nombre_estado_f, AFNDNombreEstadoEn(p_afnd_origen2, j));
+            strcat(nombre_estado_i, concatenaa);
+            strcat(nombre_estado_f, concatenaa);
+            AFNDInsertaTransicion(nuevo, nombre_estado_i, AFNDSimboloEn(p_afnd_origen2, k), nombre_estado_f);
+          }
+        }
+    }
+}
+
+/*Añadimos ahora las transiciones lambda*/
+
+/*Primero las del primer automata*/
+for(i=0; i<(getNumEstados(p_afnd_origen1)); i++){
+  for(k=0; k<(getNumEstados(p_afnd_origen1)); k++){
+      if(indiceLTransicion(p_afnd_origen1->transicionesL, i, k)==1){
+        strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd_origen1, i));
+        strcpy(nombre_estado_f, AFNDNombreEstadoEn(p_afnd_origen1, k));
+        strcat(nombre_estado_i, concatena);
+        strcat(nombre_estado_f, concatena);
+        AFNDInsertaLTransicion(nuevo, nombre_estado_i, nombre_estado_f);
+      }
+  }
+}
+/*Y ahora las del segundo automata*/
+for(i=0; i<(getNumEstados(p_afnd_origen2)); i++){
+  for(k=0; k<(getNumEstados(p_afnd_origen2)); k++){
+      if(indiceLTransicion(p_afnd_origen2->transicionesL, i, k)==1){
+        strcpy(nombre_estado_i, AFNDNombreEstadoEn(p_afnd_origen2, i));
+        strcpy(nombre_estado_f, AFNDNombreEstadoEn(p_afnd_origen2, k));
+        strcat(nombre_estado_i, concatenaa);
+        strcat(nombre_estado_f, concatenaa);
+        AFNDInsertaLTransicion(nuevo, nombre_estado_i, nombre_estado_f);
+      }
+  }
+}
+
+return nuevo;
+
 
 }
 
@@ -428,14 +636,5 @@ AFND * AFND1OConcatena(AFND * p_afnd_origen1, AFND * p_afnd_origen2){
 
 AFND * AFND1OEstrella(AFND * p_afnd_origen){
 
-  if(!p_afnd_origen)
-    return NULL;
-
-
-}
-
-void AFNDADot(AFND * p_afnd){
-
-  if(!p_afnd)
-    return;
+return NULL;
 }

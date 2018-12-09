@@ -132,13 +132,29 @@ TADcfo* getTransicionL(Transiciones_lambda *trans, char *estado){
 
 }
 
-int CierreLTransicionIJ(Transiciones_lambda *trans, int i, int j){
 
-  if(!trans || i<0 || j<0)
-    return 0;
+char** getPosTransicionL(Transiciones_lambda* trans, char* estado_ini){
 
-  if(trans->matriz_l[i][j]==1)
-    return 1;
+  char**aux=(char**)malloc(getTamanioEstados(trans->estados)*sizeof(char*));
+  int i=buscarTADcfo(trans->matriz_l_cerrada, estado_ini);
+  int j=0;
 
-  return 0;
+  while(getDato(trans->matriz_l_cerrada_hor[i], j)){
+    aux[j]=getDato(trans->matriz_l_cerrada_hor[i], j);
+    j++;
+  }
+  return aux;
+}
+
+int indiceLTransicion(Transiciones_lambda *trans, int ei, int ef){
+
+  int i=0;
+  char *aux=getEstado(trans->estados, ef);
+  while(getDato(trans->matriz_l_cerrada_hor[ei], i)){
+    if(strcmp(getDato(trans->matriz_l_cerrada_hor[ei], i), aux)==0) return 1;
+    i++;
+  }
+
+return 0;
+
 }

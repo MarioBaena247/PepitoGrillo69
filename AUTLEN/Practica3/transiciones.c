@@ -116,27 +116,28 @@ void imprimirTransicion(FILE *pf,Transiciones *trans){
   return;
 }
 
-int TransicionIndicesEstadoiSimboloEstadof(Transiciones *trans, int i_e1, int i_s, int i_e2){
+char** getPosTransicion(Transiciones* trans, char* estado_ini, char* simbolo){
 
-  if(!trans || i_e1<0 || i_s<0 || i_e2)
-    return 0;
+  char**aux=(char**)malloc(getTamanioEstados(trans->estados)*sizeof(char*));
+  int i=buscarTADcfo(trans->nombre_estado_i, estado_ini)+buscarTADcfo(trans->simbolo_entrada, simbolo);
+  int j=0;
 
-  char c_e1=i_e1+'0';
-  char c_s=i_s+'0';
-  char c_e2=i_e2+'0';
-  int i, j;
-
-  for(i=0; i<(getTamanioEstados(trans->estados)*getTamanioAlfabeto(trans->alfabeto)); i++){
-    if( strcmp(getDato(trans->nombre_estado_i, i), &c_e1)==0){
-      if(strcmp(getDato(trans->simbolo_entrada, i), &c_s)==0){
-        for(j=0;j<(getTamanioEstados(trans->estados)*getTamanioAlfabeto(trans->alfabeto)); j++){
-          if(strcmp(getDato(trans->nombre_estado_f[i], j), &c_e2)==0)
-            return 1;
-        }
-      }
-    }
+  while(getDato(trans->nombre_estado_f[i], j)){
+    aux[j]=getDato(trans->nombre_estado_f[i], j);
+    j++;
+  }
+  return aux;
 }
-  
+
+
+int indiceTransicion(Transiciones *trans, int ei, int s, int ef){
+
+  int i=0;
+  char *aux=getEstado(trans->estados, ef);
+  while(getDato(trans->nombre_estado_f[ei+s], i)){
+    if(strcmp(getDato(trans->nombre_estado_f[ei+s], i), aux)==0) return 1;
+    i++;
+  }
+
 return 0;
-  
 }
