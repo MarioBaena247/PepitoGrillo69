@@ -360,7 +360,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	uint8_t protocolo_superior=pila_protocolos[0];
 	uint8_t protocolo_inferior=pila_protocolos[2];
 	pila_protocolos++;
-	uint8_t mascara[IP_ALEN],IP_rango_origen[IP_ALEN],IP_rango_destino[IP_ALEN];
+	uint8_t mascara[IP_ALEN],IP_rango_origen[IP_ALEN],IP_rango_destino[IP_ALEN] Gateway[IP_ALEN], MAC_DST[ETH_ALEN];
 
 	printf("modulo IP(%"PRIu16") %s %d.\n",protocolo_inferior,__FILE__,__LINE__);
 
@@ -371,21 +371,39 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 //[...]
 	if(obtenerIPInterface(interface, IP_origen)==ERROR){
 		printf("No se pudo obtener IP Interface");
+		return ERROR;
 	}
 	if(obtenerMascaraInterface(interface, mascara)==ERROR){
 		printf("No se pudo obtener Mascara Interface");
+		return ERROR;
 	}
 	aplicarMascara(IP_origen, mascara, IP_ALEN, IP_rango_origen);
 	aplicarMascara(IP_destino, mascara, IP_ALEN, IP_rango_destino);
 	int flag=0, i=0;
 	for(i=0;i<IP_ALEN;i++){
-		if(IP_rango_origen[i]!=IP_rango_destino){
+		if(IP_rango_origen[i]!=IP_rango_destino[i]){
 			flag=1;
 		}
 	}
 	if(flag==1){
-		if(obtenerGateway(interface, IP_))
+		if(obtenerGateway(interface, Gateway)==ERROR){
+			printf("No se pudo obtener Gateway\n");
+			return ERROR;
+		}
+		if(solicitudARP(interface, Gateway, MAC_DST)==ERROR){
+			printf("No se pudo obtener ARP");
+			return ERROR;
+		}
+		
 	}
+	else{
+		if(solicitudARP(interface, IP_destino, MAC_DST)==ERROR){
+			printf("No se pudo obtener ARP");
+			return ERROR;
+		}
+	}
+	memcpy(((Parametros *)parametros)->ETH_destino, MAC_DST, ETH_ALEN);
+	((Parametros *)parametros)->tipo=0x4;
 //TODO A implementar el datagrama y fragmentación, asi como control de tamano segun bit DF
 //[...]
 //llamada/s a protocolo de nivel inferior [...]
@@ -413,25 +431,47 @@ uint8_t trama[ETH_FRAME_MAX]={0};
 uint8_t ETH_or [ETH_ALEN];
 uint16_t ETH_type =0x0800;
 ETH_type= htons(ETH_type);
+uint16_t MTU=htons(0);
 
 printf("modulo ETH(fisica) %s %d.\n",__FILE__,__LINE__);
 
 //TODO
 //[...] Control de tamano
+Parametros ETH= *((Parametros*)parametros);
+printf("modulo ETH(fisica) %s %d.\n",__FILE__,__LINE__);	
+
+if(obtenerMTUInterface(interface, &MTU)==ERROR)
+		return ERROR;
+if(longitud>MTU){
+	printf("Longitud: %d mayor que MTU: %d\n", longitud, MTU );
+	longitud= MTU;
+}
 
 //TODO
 //[...] Cabecera del modulo
-if(obtenerMACdeInterface(interface, ETH_or)==ERROR){
-	printf("No se pudo obtener la MAC de Interface");
+if(obtenerMACdeInterface( interface, ETH_or)==ERROR){
+	printf("Error al obtener la MAC origen\n");
 }
+memcpy(trama, ETH.ETH_destino , ETH_ALEN);
+memcpy(trama+6, ETH_or, ETH_ALEN); 
+memcpy(trama+12, &ETH_type, 2);
+memcpy(trama+14, datagrama, longitud);
 
 
 //TODO
 //Enviar a capa fisica [...]
+if (pcap_inject(descr, &trama, (size_t)(longitud + ETH_ALEN +ETH_ALEN + 2) ) ==-1){
+	 	printf("\n%s\n", pcap_geterr(descr));
+}
 //TODO
 //Almacenamos la salida por cuestiones de debugging [...]
+struct pcap_pkthdr* pcap = malloc(sizeof(struct pcap_pkthdr));
+	
+pcap->caplen = longitud + ETH_ALEN +ETH_ALEN + 2;
+pcap->len= longitud + ETH_ALEN +ETH_ALEN + 2;
+pcap_dump(( const u_char * ) pdumper,pcap , trama);
 
-	return OK;
+return OK;
 }
 
 
