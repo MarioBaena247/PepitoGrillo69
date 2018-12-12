@@ -433,7 +433,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	}
 	pos_long=pos;
 	aux16=htons(MTU);
-	memccpy(datagrama+pos, &aux16, sizeof(uint16_t));
+	memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
 	pos+=sizeof(uint16_t);
 
 	aux16=htons(ID);
@@ -494,7 +494,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 		memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
 
 		memcpy(datagrama+pos, segmento+resultado, MTU-pos);
-		protocolos_registrados[protocolo_inferior](datagrama, pila_protocolos, MTU, parametros);
+		protocolos_registrados[protocolo_inferior](datagrama, MTU, pila_protocolos, parametros);
 		resultado+=MTU-pos;
 	}
 
@@ -518,7 +518,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 
 //llamada/s a protocolo de nivel inferior [...]
 
-	return protocolos_registrados[protocolo_inferior](datagrama, pila_protocolos, longitud-resultado+pos, parametros);
+	return protocolos_registrados[protocolo_inferior](datagrama, longitud-resultado+pos, pila_protocolos, parametros);
 }
 
 
