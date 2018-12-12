@@ -588,7 +588,7 @@ struct pcap_pkthdr* pcap = malloc(sizeof(struct pcap_pkthdr));
 
 pcap->caplen = longitud + ETH_ALEN +ETH_ALEN + 2;
 pcap->len= longitud + ETH_ALEN +ETH_ALEN + 2;
-pcap_dump(pdumper,pcap , ( const u_char * ) trama);
+pcap_dump((uint8_t *)pdumper,pcap,trama);
 
 return OK;
 }
