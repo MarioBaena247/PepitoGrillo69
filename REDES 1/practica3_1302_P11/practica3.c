@@ -476,6 +476,10 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	memcpy(datagrama+pos, &IP_destino[3], sizeof(uint8_t));
 	pos+=sizeof(uint8_t);
 
+	aux32=0;
+	memcpy(datagrama+pos, &aux32, sizeof(uint32_t));
+	pos+=sizeof(uint32_t);
+
 	while((longitud-resultado)>MTU-pos){
 		aux16=htons(resultado/8);
 		aux16=0x1FFF&aux16;
