@@ -507,14 +507,14 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 
 	check_sum[0]=0;
 	check_sum[1]=0;
-	memcpy(datagrama,+pos_control, check_sum, sizeof(uint16_t));
+	memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
 	if(calcularChecksum(datagrama, pos, check_sum)==ERROR){
 		printf("ERROR al calcular CheckSum");
 		return ERROR;
 	}
 	memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
 
-	memcpy(datagrama+pos, segmento+resultado, longitud-resultado;
+	memcpy(datagrama+pos, segmento+resultado, longitud-resultado);
 
 //llamada/s a protocolo de nivel inferior [...]
 
