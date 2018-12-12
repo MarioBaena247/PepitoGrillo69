@@ -231,13 +231,13 @@ printf("Enviar(%"PRIu16") %s %d.\n",protocolo,__FILE__,__LINE__);
 
 uint8_t moduloICMP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolos, void *parametros){
 	uint8_t segmento[ICMP_DATAGRAM_MAX]={0};
-	uint8_t aux8;
-	uint16_t aux16;
-	uint32_t pos=0, pos_aux;
+	uint8_t aux8=0;
+	uint16_t aux16=0;
+	uint32_t pos=0, pos_aux=0;
 	uint8_t protocolo_inferior=pila_protocolos[1];
 	printf("modulo ICMP(%"PRIu16") %s %d.\n",protocolo_inferior,__FILE__,__LINE__);
 
-	if(longitud>ICMP_DATAGRAM_MAX{
+	if(longitud>ICMP_DATAGRAM_MAX){
 		printf("Tamaño demasiado grande");
 		return ERROR;
 	}
@@ -295,7 +295,7 @@ uint8_t moduloICMP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolo
 uint8_t moduloUDP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolos, void *parametros){
 	uint8_t segmento[UDP_SEG_MAX]={0};
 	uint16_t puerto_origen = 0, suma_control=0;
-	uint16_t aux16;
+	uint16_t aux16=0;
 	uint32_t pos=0;
 	uint8_t protocolo_inferior=pila_protocolos[1];
 	printf("modulo UDP(%"PRIu16") %s %d.\n",protocolo_inferior,__FILE__,__LINE__);
@@ -357,15 +357,15 @@ uint8_t moduloUDP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolos
 
 uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos, void *parametros){
 	uint8_t datagrama[IP_DATAGRAM_MAX]={0};
-	uint32_t aux32;
-	uint16_t aux16;
-	uint8_t aux8;
+	uint32_t aux32=0;
+	uint16_t aux16=0;
+	uint8_t aux8=0;
 	uint32_t pos=0,pos_control=0, pos_flags=0, pos_long=0;
-	uint8_t IP_origen[IP_ALEN];
+	uint8_t IP_origen[IP_ALEN]={0};
 	uint8_t protocolo_superior=pila_protocolos[0];
 	uint8_t protocolo_inferior=pila_protocolos[2];
 	pila_protocolos++;
-	uint8_t mascara[IP_ALEN],IP_rango_origen[IP_ALEN],IP_rango_destino[IP_ALEN] Gateway[IP_ALEN], MAC_DST[ETH_ALEN];
+	uint8_t mascara[IP_ALEN]={0},IP_rango_origen[IP_ALEN]={0},IP_rango_destino[IP_ALEN]={0}, Gateway[IP_ALEN]={0}, MAC_DST[ETH_ALEN]={0};
 	uint16_t MTU=htons(0);
 	uint8_t check_sum[2]={0};
 
@@ -374,7 +374,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	Parametros ipdatos=*((Parametros*)parametros);
 	uint8_t* IP_destino=ipdatos.IP_destino;
 
-	if(longitud>IP_DATAGRAM_MAX{
+	if(longitud>IP_DATAGRAM_MAX){
 		printf("Tamaño demasiado grande");
 		return ERROR;
 	}
@@ -406,7 +406,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 			printf("No se pudo obtener ARP");
 			return ERROR;
 		}
-		
+
 	}
 	else{
 		if(solicitudARP(interface, IP_destino, MAC_DST)==ERROR){
@@ -513,7 +513,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 		return ERROR;
 	}
 	memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
-	
+
 	memcpy(datagrama+pos, segmento+resultado, longitud-resultado;
 
 //llamada/s a protocolo de nivel inferior [...]
@@ -538,7 +538,7 @@ uint8_t moduloETH(uint8_t* datagrama, uint32_t longitud, uint16_t* pila_protocol
 //[....]
 //[...] Variables del modulo
 uint8_t trama[ETH_FRAME_MAX]={0};
-uint8_t ETH_or [ETH_ALEN];
+uint8_t ETH_or [ETH_ALEN]={0};
 uint16_t ETH_type =0x0800;
 ETH_type= htons(ETH_type);
 uint16_t MTU=htons(0);
@@ -553,7 +553,7 @@ if(longitud>ETH_FRAME_MAX{
 //TODO
 //[...] Control de tamano
 Parametros ETH= *((Parametros*)parametros);
-printf("modulo ETH(fisica) %s %d.\n",__FILE__,__LINE__);	
+printf("modulo ETH(fisica) %s %d.\n",__FILE__,__LINE__);
 
 if(obtenerMTUInterface(interface, &MTU)==ERROR){
 	printf("ERROR al obtener MTU");
@@ -572,7 +572,7 @@ if(obtenerMACdeInterface( interface, ETH_or)==ERROR){
 	return ERROR;
 }
 memcpy(trama, ETH.ETH_destino , ETH_ALEN);
-memcpy(trama+6, ETH_or, ETH_ALEN); 
+memcpy(trama+6, ETH_or, ETH_ALEN);
 memcpy(trama+12, &ETH_type, 2);
 memcpy(trama+14, datagrama, longitud);
 
@@ -585,7 +585,7 @@ if (pcap_inject(descr, &trama, longitud + ETH_ALEN +ETH_ALEN + 2 ) ==-1){
 //TODO
 //Almacenamos la salida por cuestiones de debugging [...]
 struct pcap_pkthdr* pcap = malloc(sizeof(struct pcap_pkthdr));
-	
+
 pcap->caplen = longitud + ETH_ALEN +ETH_ALEN + 2;
 pcap->len= longitud + ETH_ALEN +ETH_ALEN + 2;
 pcap_dump(pdumper,pcap , ( const u_char * ) trama);
