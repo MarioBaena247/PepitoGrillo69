@@ -266,8 +266,8 @@ uint8_t moduloICMP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolo
 
 	memcpy(segmento+pos, mensaje, longitud);
 
-	calcularChecksum(segmento, longitud+pos , aux16);
-	memcpy(segmento+pos_aux, &aux16, sizeof(uint16_t));
+	calcularChecksum(segmento, longitud+pos , &aux8);
+	memcpy(segmento+pos_aux, &aux8, sizeof(uint8_t));
 
 
 
@@ -294,7 +294,7 @@ uint8_t moduloICMP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolo
 
 uint8_t moduloUDP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolos, void *parametros){
 	uint8_t segmento[UDP_SEG_MAX]={0};
-	uint16_t puerto_origen = 0, suma_control=0;
+	uint16_t puerto_origen = 0;
 	uint16_t aux16=0;
 	uint32_t pos=0;
 	uint8_t protocolo_inferior=pila_protocolos[1];
@@ -312,8 +312,8 @@ uint8_t moduloUDP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolos
 //[...]
 //obtenerPuertoOrigen(...)
 	/*PUERTO DE ORIGEN*/
-	obtenerPuertoOrigen(&aux16);
-	aux16=htons(aux16);
+	obtenerPuertoOrigen(&puerto_origen);
+	aux16=htons(puerto_origen);
 	memcpy(segmento, &aux16, sizeof(uint16_t));
 	pos+=sizeof(uint16_t);
 
@@ -424,7 +424,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	pos+=sizeof(uint8_t);
 
 	aux8=0;
-	memccpy(datagrama+pos, &aux8, sizeof(uint8_t));
+	memcpy(datagrama+pos, &aux8, sizeof(uint8_t));
 	pos+=sizeof(uint8_t);
 
 	if(obtenerMTUInterface(interface, &MTU)){
@@ -437,7 +437,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	pos+=sizeof(uint16_t);
 
 	aux16=htons(ID);
-	memccpy(datagrama+pos, &aux16, sizeof(uint16_t));
+	memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
 	pos+=sizeof(uint16_t);
 
 	pos_flags=pos;
@@ -486,7 +486,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 
 		check_sum[0]=0;
 		check_sum[1]=0;
-		memcpy(datagrama,+pos_control, check_sum, sizeof(uint16_t));
+		memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
 		if(calcularChecksum(datagrama, pos, check_sum)==ERROR){
 			printf("ERROR al calcular CheckSum");
 			return ERROR;
@@ -500,7 +500,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 
 	aux16=htons(resultado/8);
 	aux16=aux16&0x1FFF;
-	memccpy(datagrama+pos_flags, &aux16, sizeof(uint16_t));
+	memcpy(datagrama+pos_flags, &aux16, sizeof(uint16_t));
 
 	aux16=htons(longitud-resultado+pos);
 	memcpy(datagrama+pos_long, &aux16, sizeof(uint16_t));
@@ -545,7 +545,7 @@ uint16_t MTU=htons(0);
 
 printf("modulo ETH(fisica) %s %d.\n",__FILE__,__LINE__);
 
-if(longitud>ETH_FRAME_MAX{
+if(longitud>ETH_FRAME_MAX){
 	printf("Tamaño demasiado grande");
 	return ERROR;
 }
