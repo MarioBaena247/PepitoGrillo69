@@ -237,6 +237,11 @@ uint8_t moduloICMP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolo
 	uint8_t protocolo_inferior=pila_protocolos[1];
 	printf("modulo ICMP(%"PRIu16") %s %d.\n",protocolo_inferior,__FILE__,__LINE__);
 
+	if(longitud>ICMP_DATAGRAM_MAX{
+		printf("Tamaño demasiado grande");
+		return ERROR;
+	}
+
 	aux8=PING_TIPO;
 	memcpy(segmento+pos,&aux8,sizeof(uint8_t));
 	pos+=sizeof(uint8_t);
@@ -355,17 +360,24 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	uint32_t aux32;
 	uint16_t aux16;
 	uint8_t aux8;
-	uint32_t pos=0,pos_control=0;
+	uint32_t pos=0,pos_control=0, pos_flags=0, pos_long=0;
 	uint8_t IP_origen[IP_ALEN];
 	uint8_t protocolo_superior=pila_protocolos[0];
 	uint8_t protocolo_inferior=pila_protocolos[2];
 	pila_protocolos++;
 	uint8_t mascara[IP_ALEN],IP_rango_origen[IP_ALEN],IP_rango_destino[IP_ALEN] Gateway[IP_ALEN], MAC_DST[ETH_ALEN];
+	uint16_t MTU=htons(0);
+	uint8_t check_sum[2]={0};
 
 	printf("modulo IP(%"PRIu16") %s %d.\n",protocolo_inferior,__FILE__,__LINE__);
 
 	Parametros ipdatos=*((Parametros*)parametros);
 	uint8_t* IP_destino=ipdatos.IP_destino;
+
+	if(longitud>IP_DATAGRAM_MAX{
+		printf("Tamaño demasiado grande");
+		return ERROR;
+	}
 //TODO
 //Llamar a solicitudARP(...) adecuadamente y usar ETH_destino de la estructura parametros
 //[...]
@@ -379,7 +391,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	}
 	aplicarMascara(IP_origen, mascara, IP_ALEN, IP_rango_origen);
 	aplicarMascara(IP_destino, mascara, IP_ALEN, IP_rango_destino);
-	int flag=0, i=0;
+	int flag=0, i=0, resultado=0;
 	for(i=0;i<IP_ALEN;i++){
 		if(IP_rango_origen[i]!=IP_rango_destino[i]){
 			flag=1;
@@ -406,9 +418,107 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	((Parametros *)parametros)->tipo=0x4;
 //TODO A implementar el datagrama y fragmentación, asi como control de tamano segun bit DF
 //[...]
+
+	aux8=0x45;
+	memcpy(datagrama, &aux8, sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+
+	aux8=0;
+	memccpy(datagrama+pos, &aux8, sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+
+	if(obtenerMTUInterface(interface, &MTU)){
+		printf("ERROR al obtener MTU");
+		return ERROR;
+	}
+	pos_long=pos;
+	aux16=htons(MTU);
+	memccpy(datagrama+pos, &aux16, sizeof(uint16_t));
+	pos+=sizeof(uint16_t);
+
+	aux16=htons(ID);
+	memccpy(datagrama+pos, &aux16, sizeof(uint16_t));
+	pos+=sizeof(uint16_t);
+
+	pos_flags=pos;
+	aux16=htons(0);
+	memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
+	pos+=sizeof(uint16_t);
+
+	aux8=64;
+	memcpy(datagrama+pos, &aux8, sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+
+	aux8=(uint8_t)protocolo_superior;
+	memcpy(datagrama+pos, &aux8, sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+
+	pos_control=pos;
+	aux16=htons(0);
+	memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
+	pos+=sizeof(uint16_t);
+
+	memcpy(datagrama+pos, &IP_origen[0], sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+	memcpy(datagrama+pos, &IP_origen[1], sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+	memcpy(datagrama+pos, &IP_origen[2], sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+	memcpy(datagrama+pos, &IP_origen[3], sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+
+	memcpy(datagrama+pos, &IP_destino[0], sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+	memcpy(datagrama+pos, &IP_destino[1], sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+	memcpy(datagrama+pos, &IP_destino[2], sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+	memcpy(datagrama+pos, &IP_destino[3], sizeof(uint8_t));
+	pos+=sizeof(uint8_t);
+
+	while((longitud-resultado)>MTU-pos){
+		aux16=htons(resultado/8);
+		aux16=0x1FFF&aux16;
+		aux16=aux16|0x2000;
+		memcpy(datagrama+pos_flags, &aux16, sizeof(uint16_t));
+
+		memcpy(datagrama+pos, segmento+resultado, MTU);
+
+		check_sum[0]=0;
+		check_sum[1]=0;
+		memcpy(datagrama,+pos_control, check_sum, sizeof(uint16_t));
+		if(calcularChecksum(datagrama, pos, check_sum)==ERROR){
+			printf("ERROR al calcular CheckSum");
+			return ERROR;
+		}
+		memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
+
+		memcpy(datagrama+pos, segmento+resultado, MTU-pos);
+		protocolos_registrados[protocolo_inferior](datagrama, pila_protocolos, MTU, parametros);
+		resultado+=MTU-pos;
+	}
+
+	aux16=htons(resultado/8);
+	aux16=aux16&0x1FFF;
+	memccpy(datagrama+pos_flags, &aux16, sizeof(uint16_t));
+
+	aux16=htons(longitud-resultado+pos);
+	memcpy(datagrama+pos_long, &aux16, sizeof(uint16_t));
+
+	check_sum[0]=0;
+	check_sum[1]=0;
+	memcpy(datagrama,+pos_control, check_sum, sizeof(uint16_t));
+	if(calcularChecksum(datagrama, pos, check_sum)==ERROR){
+		printf("ERROR al calcular CheckSum");
+		return ERROR;
+	}
+	memcpy(datagrama+pos_control, check_sum, sizeof(uint16_t));
+	
+	memcpy(datagrama+pos, segmento+resultado, longitud-resultado;
+
 //llamada/s a protocolo de nivel inferior [...]
 
-
+	return protocolos_registrados[protocolo_inferior](datagrama, pila_protocolos, longitud-resultado+pos, parametros);
 }
 
 
@@ -435,22 +545,31 @@ uint16_t MTU=htons(0);
 
 printf("modulo ETH(fisica) %s %d.\n",__FILE__,__LINE__);
 
+if(longitud>ETH_FRAME_MAX{
+	printf("Tamaño demasiado grande");
+	return ERROR;
+}
+
 //TODO
 //[...] Control de tamano
 Parametros ETH= *((Parametros*)parametros);
 printf("modulo ETH(fisica) %s %d.\n",__FILE__,__LINE__);	
 
-if(obtenerMTUInterface(interface, &MTU)==ERROR)
-		return ERROR;
+if(obtenerMTUInterface(interface, &MTU)==ERROR){
+	printf("ERROR al obtener MTU");
+	return ERROR;
+}
+
 if(longitud>MTU){
 	printf("Longitud: %d mayor que MTU: %d\n", longitud, MTU );
-	longitud= MTU;
+	longitud=MTU;
 }
 
 //TODO
 //[...] Cabecera del modulo
 if(obtenerMACdeInterface( interface, ETH_or)==ERROR){
 	printf("Error al obtener la MAC origen\n");
+	return ERROR;
 }
 memcpy(trama, ETH.ETH_destino , ETH_ALEN);
 memcpy(trama+6, ETH_or, ETH_ALEN); 
@@ -460,7 +579,7 @@ memcpy(trama+14, datagrama, longitud);
 
 //TODO
 //Enviar a capa fisica [...]
-if (pcap_inject(descr, &trama, (size_t)(longitud + ETH_ALEN +ETH_ALEN + 2) ) ==-1){
+if (pcap_inject(descr, &trama, longitud + ETH_ALEN +ETH_ALEN + 2 ) ==-1){
 	 	printf("\n%s\n", pcap_geterr(descr));
 }
 //TODO
@@ -469,7 +588,7 @@ struct pcap_pkthdr* pcap = malloc(sizeof(struct pcap_pkthdr));
 	
 pcap->caplen = longitud + ETH_ALEN +ETH_ALEN + 2;
 pcap->len= longitud + ETH_ALEN +ETH_ALEN + 2;
-pcap_dump(( const u_char * ) pdumper,pcap , trama);
+pcap_dump(pdumper,pcap , ( const u_char * ) trama);
 
 return OK;
 }
