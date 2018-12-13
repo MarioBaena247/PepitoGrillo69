@@ -422,12 +422,16 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 			printf("No se pudo obtener ARP");
 			return ERROR;
 		}
+
+		printf("RED NO LOCAL: \n");
 	}
 	else{
 		if(solicitudARP(interface, IP_destino, ipdatos.ETH_destino)==ERROR){
 			printf("No se pudo obtener ARP");
 			return ERROR;
 		}
+
+		printf("RED LOCAL: \n");
 	}
 
 
