@@ -366,7 +366,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	uint8_t datagrama[IP_DATAGRAM_MAX]={0};
 	uint16_t aux16=0;
 	uint8_t aux8=0;
-	uint32_t pos=0;
+	uint32_t pos=0, pos_control=0;
 	uint8_t IP_origen[IP_ALEN]={0};
 	uint8_t protocolo_superior=pila_protocolos[0];
 	uint8_t protocolo_inferior=pila_protocolos[2];
