@@ -364,16 +364,14 @@ uint8_t moduloUDP(uint8_t* mensaje, uint32_t longitud, uint16_t* pila_protocolos
 
 uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos, void *parametros){
 	uint8_t datagrama[IP_DATAGRAM_MAX]={0};
-	uint32_t aux32=0;
 	uint16_t aux16=0;
 	uint8_t aux8=0;
-	uint8_t *arg;
-	uint32_t pos=0,pos_control=0, pos_flags=0, pos_long=0;
+	uint32_t pos=0;
 	uint8_t IP_origen[IP_ALEN]={0};
 	uint8_t protocolo_superior=pila_protocolos[0];
 	uint8_t protocolo_inferior=pila_protocolos[2];
 	pila_protocolos++;
-	uint8_t mascara[IP_ALEN]={0},IP_rango_origen[IP_ALEN]={0},IP_rango_destino[IP_ALEN]={0}, Gateway[IP_ALEN]={0}, MAC_DST[ETH_ALEN]={0};
+	uint8_t mascara[IP_ALEN]={0},IP_rango_origen[IP_ALEN]={0},IP_rango_destino[IP_ALEN]={0}, Gateway[IP_ALEN]={0};
 	uint16_t MTU=htons(0);
 	int cabecera_ip=20, num_paquetes=0;
 
@@ -473,7 +471,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 		pos+=1;
 
 		//Protocolo
-		printf("Usamos el protocolo %"PRIu16"", protocolo_superior);
+		printf("Usamos el protocolo %"PRIu16"\n", protocolo_superior);
 		aux8=(uint8_t)protocolo_superior;
 		memcpy(datagrama+pos, &aux8, sizeof(uint8_t));
 		pos+=1;
