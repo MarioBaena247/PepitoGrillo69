@@ -366,7 +366,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 	uint8_t datagrama[IP_DATAGRAM_MAX]={0};
 	uint16_t aux16=0;
 	uint8_t aux8=0;
-	uint32_t pos=0, pos_control=0;
+	uint32_t pos=0;
 	uint8_t IP_origen[IP_ALEN]={0};
 	uint8_t protocolo_superior=pila_protocolos[0];
 	uint8_t protocolo_inferior=pila_protocolos[2];
@@ -478,7 +478,6 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 		//EL checksum primero se deja a 0 y mas tarde se cambia.
 		aux16=0;
 		memcpy(datagrama+pos, &aux16, sizeof(uint16_t));
-		pos_control=pos;
 		pos+=2;
 
 		//Ip origen e Ip destino.
@@ -515,7 +514,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 		//Añadimos el mensaje
 		memcpy(datagrama+pos, segmento, MTU-cabecera_ip);
 		segmento+=(MTU-cabecera_ip);
-		protocolos_registrados[protocolo_inferior](datagrama, longitud-resultado+pos, pila_protocolos, &ipdatos);
+		protocolos_registrados[protocolo_inferior](datagrama, longitud-resultado+pos, pila_protocolos, parametros);
 		}
 
 	//Ultimo fragmento o sin fragmentación.
@@ -546,7 +545,7 @@ uint8_t moduloIP(uint8_t* segmento, uint32_t longitud, uint16_t* pila_protocolos
 		mostrarHex(datagrama, longitud+cabecera_ip);
 
 
-	return protocolos_registrados[protocolo_inferior](datagrama, longitud-resultado+pos, pila_protocolos, &ipdatos);
+	return protocolos_registrados[protocolo_inferior](datagrama, longitud-resultado+pos, pila_protocolos, parametros);
 }
 
 
