@@ -1,0 +1,7 @@
+digraph grafo{rankdir=LR;
+	_invisible [style="invis"];
+	q1 [label="q0"];
+	_invisible -> q1;
+	q2 [label="q1"][penwidth="2"];
+	q1 -> q2 [label="1"];
+}

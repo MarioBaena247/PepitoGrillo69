@@ -217,7 +217,7 @@ void AFNDProcesaEntrada(FILE * fd, AFND * p_afnd){
 
 void AFNDTransita(AFND * p_afnd){
 
-  int i, j, k, t;
+  int i, j, k;
   Estados *aux= NULL;
   TADcfo *tad=NULL;
   char *caracter=extraePalabra(p_afnd->entrada);
@@ -798,7 +798,7 @@ for(i=0; i<(getNumEstados(p_afnd_origen)); i++){
   }
 }
 
-/*Por último hacemos las transiciones lambda propias de la operacion de estrella (1)*,
+/*Por último hacemos las transiciones lambda propias de la operacion de estrella ()*,
 es decir, los indices que guardamos antes como aux_incial y aux_final, los usamos para unir
 el nuevo estado inicial, con el antiguo, y el nuevo estado final con el antiguo, y para unir
 estos dos estados nuevos entre ellos*/
@@ -862,6 +862,6 @@ for(i=0; i<(getNumEstados(p_afnd)); i++){
 }
 
 fprintf(f, "}");
-
+fclose(f);
 
 }

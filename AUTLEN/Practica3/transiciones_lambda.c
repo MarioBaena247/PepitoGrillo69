@@ -150,9 +150,7 @@ char** getPosTransicionL(Transiciones_lambda* trans, char* estado_ini){
 
 int indiceLTransicion(Transiciones_lambda *trans, int ei, int ef){
 
-  int i=0;
   if(ei==ef) return 0;
-  char *aux=getEstado(trans->estados, ef);
   return trans->matriz_l[ei][ef];
 
 
