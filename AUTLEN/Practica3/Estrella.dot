@@ -1,0 +1,22 @@
+digraph grafo{rankdir=LR;
+	_invisible [style="invis"];
+	inicial [label="q0"];
+	_invisible -> inicial;
+	inicial_X [label="q1"];
+	q1_U1_X [label="q2"];
+	q2_U1_X [label="q3"];
+	q1_U2_X [label="q4"];
+	q2_U2_X [label="q5"];
+	final_X [label="q6"];
+	final [label="q7"][penwidth="2"];
+	q1_U1_X -> q2_U1_X [label="0"];
+	q1_U2_X -> q2_U2_X [label="1"];
+	inicial -> inicial_X [label="&lambda;"];
+	inicial -> final [label="&lambda;"];
+	inicial_X -> q1_U1_X [label="&lambda;"];
+	inicial_X -> q1_U2_X [label="&lambda;"];
+	q2_U1_X -> final_X [label="&lambda;"];
+	q2_U2_X -> final_X [label="&lambda;"];
+	final_X -> final [label="&lambda;"];
+	final -> inicial [label="&lambda;"];
+}

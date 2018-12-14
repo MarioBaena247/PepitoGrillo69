@@ -1,0 +1,16 @@
+digraph grafo{rankdir=LR;
+	_invisible [style="invis"];
+	inicial [label="q0"];
+	_invisible -> inicial;
+	q1_U1 [label="q1"];
+	q2_U1 [label="q2"];
+	q1_U2 [label="q3"];
+	q2_U2 [label="q4"];
+	final [label="q5"][penwidth="2"];
+	q1_U1 -> q2_U1 [label="0"];
+	q1_U2 -> q2_U2 [label="1"];
+	inicial -> q1_U1 [label="&lambda;"];
+	inicial -> q1_U2 [label="&lambda;"];
+	q2_U1 -> final [label="&lambda;"];
+	q2_U2 -> final [label="&lambda;"];
+}

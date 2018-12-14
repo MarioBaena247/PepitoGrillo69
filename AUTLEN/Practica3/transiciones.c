@@ -9,6 +9,7 @@ struct _Transiciones{
   TADcfo *nombre_estado_i;
   TADcfo *simbolo_entrada;
   TADcfo **nombre_estado_f;
+  int tamanio_estados;
   int flag;
 };
 
@@ -30,7 +31,7 @@ for(i=0; i<(getTamanioAlfabeto(alf)*getTamanioEstados(est)); i++){
 }
 
 /*Inicializamos los datos de transiciones*/
-
+trans->tamanio_estados=getTamanioEstados(est);
 return trans;
 }
 
@@ -134,8 +135,9 @@ int indiceTransicion(Transiciones *trans, int ei, int s, int ef){
 
   int i=0;
   char *aux=getEstado(trans->estados, ef);
-  while(getDato(trans->nombre_estado_f[ei+s], i)){
-    if(strcmp(getDato(trans->nombre_estado_f[ei+s], i), aux)==0) return 1;
+
+  while(getDato(trans->nombre_estado_f[getTamanioAlfabeto(trans->alfabeto)*ei+s], i)){
+    if(strcmp(getDato(trans->nombre_estado_f[getTamanioAlfabeto(trans->alfabeto)*ei+s], i), aux)==0) return 1;
     i++;
   }
 

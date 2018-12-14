@@ -30,7 +30,7 @@ int AFNDTipoEstadoEn(AFND * p_afnd, int pos);
 char * AFNDNombreEstadoEn(AFND * p_afnd, int pos);
 char *AFNDSimboloEn(AFND *p_afnd, int pos);
 AFND * AFNDAAFND1O(AFND * p_afnd);
-AFND * AFND1OConcatena(AFND * p_afnd1O_1, AFND * p_afnd1O_2);
-AFND * AFND1OUne(AFND * p_afnd_origen1, AFND * p_afnd_origen2);
+AFND * AFND1OConcatena(AFND * p_afnd_origen1, AFND * p_afnd_origen2);
+AFND * AFND1OUne(AFND * p_afnd1O_1, AFND * p_afnd1O_2);
 AFND * AFND1OEstrella(AFND * p_afnd_origen);
-
+void AFNDADot(AFND *p_afnd);

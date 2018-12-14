@@ -13,7 +13,7 @@ Estados *nuevoEstados(int num_estados){
 
   if(num_estados<0)
     return NULL;
-  Estados *est=(Estados*)malloc(num_estados*sizeof(Estados*));
+  Estados *est=(Estados*)malloc(num_estados*sizeof(Estados));
   if(!est)return NULL;
   est->tipos=(int*)malloc(num_estados*sizeof(int));
   if(!est->tipos) return NULL;
@@ -30,7 +30,7 @@ void estadoNormal(Estados *est, int pos){
 }
 
 int getTamanioEstados(Estados *est){
-  return est->tamanio;
+  return getTamanioTad(est->estados);
 }
 
 void liberaEstado(Estados *est){
